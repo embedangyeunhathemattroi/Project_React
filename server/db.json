@@ -1,0 +1,924 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "email": "admin@mail.com",
+      "password": "123456linh@",
+      "role": "admin",
+      "firstName": "Nguyễn",
+      "lastName": "A"
+    },
+    {
+      "id": 2,
+      "email": "user1@mail.com",
+      "password": "abcdef",
+      "role": "user",
+      "firstName": "Nguyễn",
+      "lastName": "Bs"
+    },
+    {
+      "firstName": "linh",
+      "lastName": "le",
+      "email": "phamngoclinhtq2006@gmail.com",
+      "password": "Linh12345",
+      "role": "user",
+      "id": 3
+    },
+    {
+      "firstName": "linh",
+      "lastName": "le",
+      "email": "le2006@gmail.com",
+      "password": "linh123456",
+      "role": "user",
+      "id": 4
+    },
+    {
+      "firstName": "linh",
+      "lastName": "le",
+      "email": "lan@gmail.com",
+      "password": "Linh2006@",
+      "role": "user",
+      "id": 5
+    },
+    {
+      "firstName": "linh",
+      "lastName": "le",
+      "email": "linh2006@gmail.com",
+      "password": "Linh2006@",
+      "role": "user",
+      "id": 6
+    },
+    {
+      "firstName": "linh",
+      "lastName": "le",
+      "email": "linh200@gmail.com",
+      "password": "Linh2006@",
+      "role": "user",
+      "id": 7
+    },
+    {
+      "firstName": "linh",
+      "lastName": "le",
+      "email": "li@gmail.com",
+      "password": "Linh2006@",
+      "role": "user",
+      "id": 8
+    },
+    {
+      "firstName": "linh",
+      "lastName": "le",
+      "email": "lin@gmail.com",
+      "password": "Linh2006@",
+      "role": "user",
+      "id": 9
+    },
+    {
+      "firstName": "linh",
+      "lastName": "le",
+      "email": "lin12@gmail.com",
+      "password": "Linh2006@",
+      "role": "user",
+      "id": 10
+    },
+    {
+      "firstName": "linh",
+      "lastName": "le",
+      "email": "lin1@gmail.com",
+      "password": "Linh2006@",
+      "role": "user",
+      "id": 11
+    },
+    {
+      "firstName": "linh",
+      "lastName": "le",
+      "email": "liii@gmail.com",
+      "password": "Linh2006@",
+      "role": "user",
+      "id": 12
+    },
+    {
+      "firstName": "linh",
+      "lastName": "le",
+      "email": "12@gmail.com",
+      "password": "Linh2006@",
+      "role": "user",
+      "id": 13
+    },
+    {
+      "firstName": "sdfsdf",
+      "lastName": "dsfsdf",
+      "email": "133@gmail.com",
+      "password": "Duy@12345",
+      "role": "user",
+      "id": 14
+    },
+    {
+      "firstName": "linh",
+      "lastName": "le",
+      "email": "hahaa@gmail.com",
+      "password": "Linh123@",
+      "role": "user",
+      "id": 15
+    },
+    {
+      "firstName": "linh",
+      "lastName": "le",
+      "email": "hihi@gmail.com",
+      "password": "Linh2006@",
+      "role": "user",
+      "id": 16
+    },
+    {
+      "firstName": "linh",
+      "lastName": "le",
+      "email": "hi@gmail.com",
+      "password": "Linh2006@",
+      "confirmPassword": "Linh2006@",
+      "role": "user",
+      "id": 17
+    },
+    {
+      "firstName": "linh",
+      "lastName": "le",
+      "email": "han@gmail.com",
+      "password": "Han2006@",
+      "role": "user",
+      "id": 18
+    },
+    {
+      "firstName": "Nopal",
+      "lastName": "Grant",
+      "email": "6@gmail.com",
+      "password": "Linh2006@",
+      "role": "user",
+      "id": 19
+    },
+    {
+      "firstName": "linh",
+      "lastName": "le",
+      "email": "hang@gmail.com",
+      "password": "Linh2006@",
+      "role": "user",
+      "id": 20
+    },
+    {
+      "firstName": "Nopal",
+      "lastName": "Grant",
+      "email": "msi@gmail.com",
+      "password": "Linh2006@",
+      "role": "user",
+      "id": 21
+    }
+  ],
+  "categories": [
+    {
+      "id": 1,
+      "name": "Động Vật",
+      "topic": "Animals",
+      "description": "Các loài động vật phổ biến",
+      "createdAt": "2024-10-15T10:00:00Z"
+    },
+    {
+      "id": 2,
+      "name": "Hành Động",
+      "topic": "Action",
+      "description": "Các từ vựng về hành động",
+      "createdAt": "2025-03-15T10:00:00Z"
+    },
+    {
+      "id": 3,
+      "name": "Tính Từ",
+      "topic": "Adjective",
+      "description": "Các tính từ cơ bản",
+      "createdAt": "2024-10-15T10:00:00Z"
+    },
+    {
+      "id": 4,
+      "name": "Màu Sắc",
+      "topic": "Color",
+      "description": "Tên các màu cơ bản",
+      "createdAt": "2024-11-01T10:00:00Z"
+    },
+    {
+      "id": 5,
+      "name": "Gia Đình",
+      "topic": "Family",
+      "description": "Các từ vựng về thành viên gia đình",
+      "createdAt": "2025-01-10T10:00:00Z"
+    },
+    {
+      "id": 6,
+      "name": "Cảm xúc",
+      "topic": "Emotion",
+      "description": "Các từ vựng về cảm xúc",
+      "createdAt": "2025-02-05T10:00:00Z"
+    },
+    {
+      "id": 7,
+      "name": "Thời Tiết",
+      "topic": "Weather",
+      "description": "Các từ vựng về thời tiết",
+      "createdAt": "2025-03-01T10:00:00Z"
+    },
+    {
+      "id": 8,
+      "name": "Thức Ăn",
+      "topic": "Food",
+      "description": "Tên các loại thức ăn phổ biến",
+      "createdAt": "2025-03-20T10:00:00Z"
+    },
+    {
+      "id": 9,
+      "name": "Động Từ Học Tập",
+      "topic": "Study Verbs",
+      "description": "Các động từ liên quan học tập",
+      "createdAt": "2025-04-10T10:00:00Z"
+    },
+    {
+      "id": 10,
+      "name": "Công Nghệ",
+      "topic": "Technology",
+      "description": "Từ vựng về công nghệ",
+      "createdAt": "2025-05-01T10:00:00Z"
+    },
+    {
+      "name": "Animal",
+      "topic": "Animal",
+      "createdAt": "2025-10-04T10:25:55.323Z",
+      "id": 11
+    }
+  ],
+  "vocabs": [
+    {
+      "id": 101,
+      "word": "Cats",
+      "meaning": "Con mèo",
+      "categoryId": 1,
+      "isLearned": false,
+      "topic": "Animal"
+    },
+    {
+      "id": 102,
+      "word": "Dog",
+      "meaning": "Con chó",
+      "categoryId": 1,
+      "isLearned": false,
+      "topic": "Animal"
+    },
+    {
+      "id": 103,
+      "word": "Elephant",
+      "meaning": "Con voi",
+      "categoryId": 1,
+      "isLearned": false,
+      "topic": "Animal"
+    },
+    {
+      "id": 104,
+      "word": "Tiger",
+      "meaning": "Con hổ",
+      "categoryId": 1,
+      "isLearned": false,
+      "topic": "Animal"
+    },
+    {
+      "id": 105,
+      "word": "Lion",
+      "meaning": "Sư tử",
+      "categoryId": 1,
+      "isLearned": false,
+      "topic": "Animal"
+    },
+    {
+      "id": 106,
+      "word": "Monkey",
+      "meaning": "Con khỉ",
+      "categoryId": 1,
+      "isLearned": false,
+      "topic": "Animal"
+    },
+    {
+      "id": 107,
+      "word": "Rabbit",
+      "meaning": "Con thỏ",
+      "categoryId": 1,
+      "isLearned": false,
+      "topic": "Animal"
+    },
+    {
+      "id": 108,
+      "word": "Horse",
+      "meaning": "Con ngựa",
+      "categoryId": 1,
+      "isLearned": false,
+      "topic": "Animal"
+    },
+    {
+      "id": 109,
+      "word": "Cow",
+      "meaning": "Con bò",
+      "categoryId": 1,
+      "isLearned": false,
+      "topic": "Animal"
+    },
+    {
+      "id": 110,
+      "word": "Sheep",
+      "meaning": "Con cừu",
+      "categoryId": 1,
+      "isLearned": false,
+      "topic": "Animal"
+    },
+    {
+      "id": 201,
+      "word": "Run",
+      "meaning": "Chạy",
+      "categoryId": 2,
+      "isLearned": false,
+      "topic": "Action"
+    },
+    {
+      "id": 202,
+      "word": "Jump",
+      "meaning": "Nhảy",
+      "categoryId": 2,
+      "isLearned": false,
+      "topic": "Action"
+    },
+    {
+      "id": 203,
+      "word": "Swim",
+      "meaning": "Bơi",
+      "categoryId": 2,
+      "isLearned": false,
+      "topic": "Action"
+    },
+    {
+      "id": 204,
+      "word": "Read",
+      "meaning": "Đọc",
+      "categoryId": 2,
+      "isLearned": false,
+      "topic": "Action"
+    },
+    {
+      "id": 205,
+      "word": "Write",
+      "meaning": "Viết",
+      "categoryId": 2,
+      "isLearned": false,
+      "topic": "Action"
+    },
+    {
+      "id": 206,
+      "word": "Eat",
+      "meaning": "Ăn",
+      "categoryId": 2,
+      "isLearned": false,
+      "topic": "Action"
+    },
+    {
+      "id": 207,
+      "word": "Drink",
+      "meaning": "Uống",
+      "categoryId": 2,
+      "isLearned": false,
+      "topic": "Action"
+    },
+    {
+      "id": 208,
+      "word": "Sing",
+      "meaning": "Hát",
+      "categoryId": 2,
+      "isLearned": false,
+      "topic": "Action"
+    },
+    {
+      "id": 209,
+      "word": "Dance",
+      "meaning": "Nhảy múa",
+      "categoryId": 2,
+      "isLearned": false,
+      "topic": "Action"
+    },
+    {
+      "id": 210,
+      "word": "Sleep",
+      "meaning": "Ngủ",
+      "categoryId": 2,
+      "isLearned": false,
+      "topic": "Action"
+    },
+    {
+      "id": 301,
+      "word": "Big",
+      "meaning": "Lớn",
+      "categoryId": 3,
+      "isLearned": false,
+      "topic": "Adjective"
+    },
+    {
+      "id": 302,
+      "word": "Small",
+      "meaning": "Nhỏ",
+      "categoryId": 3,
+      "isLearned": false,
+      "topic": "Adjective"
+    },
+    {
+      "id": 303,
+      "word": "Hot",
+      "meaning": "Nóng",
+      "categoryId": 3,
+      "isLearned": false,
+      "topic": "Adjective"
+    },
+    {
+      "id": 304,
+      "word": "Cold",
+      "meaning": "Lạnh",
+      "categoryId": 3,
+      "isLearned": false,
+      "topic": "Adjective"
+    },
+    {
+      "id": 305,
+      "word": "Fast",
+      "meaning": "Nhanh",
+      "categoryId": 3,
+      "isLearned": false,
+      "topic": "Adjective"
+    },
+    {
+      "id": 306,
+      "word": "Slow",
+      "meaning": "Chậm",
+      "categoryId": 3,
+      "isLearned": false,
+      "topic": "Adjective"
+    },
+    {
+      "id": 307,
+      "word": "Happy",
+      "meaning": "Vui",
+      "categoryId": 3,
+      "isLearned": false,
+      "topic": "Adjective"
+    },
+    {
+      "id": 308,
+      "word": "Sad",
+      "meaning": "Buồn",
+      "categoryId": 3,
+      "isLearned": false,
+      "topic": "Adjective"
+    },
+    {
+      "id": 309,
+      "word": "Beautiful",
+      "meaning": "Đẹp",
+      "categoryId": 3,
+      "isLearned": false,
+      "topic": "Adjective"
+    },
+    {
+      "id": 310,
+      "word": "Ugly",
+      "meaning": "Xấu",
+      "categoryId": 3,
+      "isLearned": false,
+      "topic": "Adjective"
+    },
+    {
+      "id": 401,
+      "word": "Red",
+      "meaning": "Đỏ",
+      "categoryId": 4,
+      "isLearned": false,
+      "topic": "Color"
+    },
+    {
+      "id": 402,
+      "word": "Blue",
+      "meaning": "Xanh dương",
+      "categoryId": 4,
+      "isLearned": false,
+      "topic": "Color"
+    },
+    {
+      "id": 403,
+      "word": "Green",
+      "meaning": "Xanh lá",
+      "categoryId": 4,
+      "isLearned": false,
+      "topic": "Color"
+    },
+    {
+      "id": 404,
+      "word": "Yellow",
+      "meaning": "Vàng",
+      "categoryId": 4,
+      "isLearned": false,
+      "topic": "Color"
+    },
+    {
+      "id": 405,
+      "word": "Black",
+      "meaning": "Đen",
+      "categoryId": 4,
+      "isLearned": false,
+      "topic": "Color"
+    },
+    {
+      "id": 406,
+      "word": "White",
+      "meaning": "Trắng",
+      "categoryId": 4,
+      "isLearned": false,
+      "topic": "Color"
+    },
+    {
+      "id": 407,
+      "word": "Orange",
+      "meaning": "Cam",
+      "categoryId": 4,
+      "isLearned": false,
+      "topic": "Color"
+    },
+    {
+      "id": 408,
+      "word": "Purple",
+      "meaning": "Tím",
+      "categoryId": 4,
+      "isLearned": false,
+      "topic": "Color"
+    },
+    {
+      "id": 409,
+      "word": "Pink",
+      "meaning": "Hồng",
+      "categoryId": 4,
+      "isLearned": false,
+      "topic": "Color"
+    },
+    {
+      "id": 410,
+      "word": "Brown",
+      "meaning": "Nâu",
+      "categoryId": 4,
+      "isLearned": false,
+      "topic": "Color"
+    },
+    {
+      "id": 501,
+      "word": "Father",
+      "meaning": "Cha",
+      "categoryId": 5,
+      "isLearned": false,
+      "topic": "Family"
+    },
+    {
+      "id": 502,
+      "word": "Mother",
+      "meaning": "Mẹ",
+      "categoryId": 5,
+      "isLearned": false,
+      "topic": "Family"
+    },
+    {
+      "id": 503,
+      "word": "Brother",
+      "meaning": "Anh trai",
+      "categoryId": 5,
+      "isLearned": false,
+      "topic": "Family"
+    },
+    {
+      "id": 504,
+      "word": "Sister",
+      "meaning": "Chị gái",
+      "categoryId": 5,
+      "isLearned": false,
+      "topic": "Family"
+    },
+    {
+      "id": 505,
+      "word": "Son",
+      "meaning": "Con trai",
+      "categoryId": 5,
+      "isLearned": false,
+      "topic": "Family"
+    },
+    {
+      "id": 506,
+      "word": "Daughter",
+      "meaning": "Con gái",
+      "categoryId": 5,
+      "isLearned": false,
+      "topic": "Family"
+    },
+    {
+      "id": 507,
+      "word": "Grandfather",
+      "meaning": "Ông",
+      "categoryId": 5,
+      "isLearned": false,
+      "topic": "Family"
+    },
+    {
+      "id": 508,
+      "word": "Grandmother",
+      "meaning": "Bà",
+      "categoryId": 5,
+      "isLearned": false,
+      "topic": "Family"
+    },
+    {
+      "id": 509,
+      "word": "Uncle",
+      "meaning": "Chú/Bác",
+      "categoryId": 5,
+      "isLearned": false,
+      "topic": "Family"
+    },
+    {
+      "id": 510,
+      "word": "Aunt",
+      "meaning": "Cô/Bác",
+      "categoryId": 5,
+      "isLearned": false,
+      "topic": "Family"
+    },
+    {
+      "word": "Bird",
+      "meaning": "Con chim",
+      "topic": "Animal",
+      "id": 511
+    },
+    {
+      "word": "milk",
+      "meaning": "sữa",
+      "topic": "Sữa",
+      "id": 512
+    }
+  ],
+  "question": [
+    {
+      "id": 1,
+      "question": "What is the meaning of 'Cat'?",
+      "options": [
+        "Con mèo",
+        "Con chó",
+        "Con voi",
+        "Con hổ"
+      ],
+      "answer": "Con mèo",
+      "category": "Animal"
+    },
+    {
+      "id": 2,
+      "question": "What is the meaning of 'Dog'?",
+      "options": [
+        "Con mèo",
+        "Con chó",
+        "Con voi",
+        "Con hổ"
+      ],
+      "answer": "Con chó",
+      "category": "Animal"
+    },
+    {
+      "id": 3,
+      "question": "What is the meaning of 'Elephant'?",
+      "options": [
+        "Con voi",
+        "Con hổ",
+        "Con khỉ",
+        "Con thỏ"
+      ],
+      "answer": "Con voi",
+      "category": "Animal"
+    },
+    {
+      "id": 4,
+      "question": "What is the meaning of 'Tiger'?",
+      "options": [
+        "Sư tử",
+        "Con hổ",
+        "Con bò",
+        "Con cừu"
+      ],
+      "answer": "Con hổ",
+      "category": "Animal"
+    },
+    {
+      "id": 5,
+      "question": "What is the meaning of 'Lion'?",
+      "options": [
+        "Sư tử",
+        "Con hổ",
+        "Con ngựa",
+        "Con thỏ"
+      ],
+      "answer": "Sư tử",
+      "category": "Animal"
+    },
+    {
+      "id": 6,
+      "question": "What is the meaning of 'Run'?",
+      "options": [
+        "Chạy",
+        "Nhảy",
+        "Bơi",
+        "Đọc"
+      ],
+      "answer": "Chạy",
+      "category": "Action"
+    },
+    {
+      "id": 7,
+      "question": "What is the meaning of 'Jump'?",
+      "options": [
+        "Nhảy",
+        "Chạy",
+        "Viết",
+        "Uống"
+      ],
+      "answer": "Nhảy",
+      "category": "Action"
+    },
+    {
+      "id": 8,
+      "question": "What is the meaning of 'Swim'?",
+      "options": [
+        "Bơi",
+        "Chạy",
+        "Nhảy",
+        "Ăn"
+      ],
+      "answer": "Bơi",
+      "category": "Action"
+    },
+    {
+      "id": 9,
+      "question": "What is the meaning of 'Read'?",
+      "options": [
+        "Đọc",
+        "Viết",
+        "Hát",
+        "Uống"
+      ],
+      "answer": "Đọc",
+      "category": "Action"
+    },
+    {
+      "id": 10,
+      "question": "What is the meaning of 'Write'?",
+      "options": [
+        "Viết",
+        "Đọc",
+        "Ăn",
+        "Nhảy"
+      ],
+      "answer": "Viết",
+      "category": "Action"
+    }
+  ],
+  "results": [
+    {
+      "userId": 1,
+      "score": 0,
+      "total": 1,
+      "category": "All Categories",
+      "date": "2025-10-02",
+      "id": 2
+    },
+    {
+      "userId": 1,
+      "score": 0,
+      "total": 1,
+      "category": "All Categories",
+      "date": "2025-10-02",
+      "id": 3
+    },
+    {
+      "userId": 1,
+      "score": 7,
+      "total": 10,
+      "category": "All Categories",
+      "date": "2025-10-02",
+      "id": 4
+    },
+    {
+      "userId": 1,
+      "score": 4,
+      "total": 5,
+      "category": "Action",
+      "date": "2025-10-02",
+      "id": 5
+    },
+    {
+      "id": 1759428204581,
+      "userId": 1,
+      "score": 8,
+      "total": 10,
+      "category": "All Categories",
+      "date": "2025-10-02"
+    },
+    {
+      "userId": 1,
+      "score": 3,
+      "total": 5,
+      "category": "Action",
+      "date": "2025-10-02",
+      "id": 1759428204582
+    },
+    {
+      "id": 1759429091130,
+      "userId": 1,
+      "score": 3,
+      "total": 5,
+      "category": "Action",
+      "date": "2025-10-02"
+    },
+    {
+      "id": 1759429272464,
+      "userId": 1,
+      "score": 1,
+      "total": 5,
+      "category": "Action",
+      "date": "2025-10-02"
+    },
+    {
+      "id": 1759457456124,
+      "userId": 1,
+      "score": 2,
+      "total": 5,
+      "category": "Action",
+      "date": "2025-10-03"
+    },
+    {
+      "id": 1759457696200,
+      "userId": 1,
+      "score": 4,
+      "total": 5,
+      "category": "Action",
+      "date": "2025-10-03"
+    },
+    {
+      "id": 1759457843331,
+      "userId": 1,
+      "score": 4,
+      "total": 5,
+      "category": "Action",
+      "date": "2025-10-03"
+    },
+    {
+      "id": 1759460975211,
+      "userId": 1,
+      "score": 4,
+      "total": 5,
+      "category": "Action",
+      "date": "2025-10-03"
+    },
+    {
+      "date": "2025-10-04T11:43:42.654Z",
+      "category": "Animal",
+      "score": 3,
+      "total": 5,
+      "answers": [
+        {
+          "questionId": 1,
+          "selected": "Con mèo",
+          "correct": "Con mèo",
+          "isCorrect": true
+        },
+        {
+          "questionId": 2,
+          "selected": "Con chó",
+          "correct": "Con chó",
+          "isCorrect": true
+        },
+        {
+          "questionId": 3,
+          "selected": "Con voi",
+          "correct": "Con voi",
+          "isCorrect": true
+        },
+        {
+          "questionId": 4,
+          "selected": "Sư tử",
+          "correct": "Con hổ",
+          "isCorrect": false
+        },
+        {
+          "questionId": 5,
+          "selected": "Con ngựa",
+          "correct": "Sư tử",
+          "isCorrect": false
+        }
+      ],
+      "id": 1759460975212
+    }
+  ]
+}
