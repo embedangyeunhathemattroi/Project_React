@@ -2,26 +2,29 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Swal from "sweetalert2";
 import "bootstrap/dist/css/bootstrap.min.css";
+
 import {
   addVocab,
   deleteVocab,
   fetchVocabs,
   updateVocab,
 } from "../../stores/slices/vocabSLice";
+
 import { fetchCategories, addCategory } from "../../stores/slices/categoriesSlice";
+
 import PaginationAntd from "../../components/common/Pagination";
 import Footer from "../../components/common/Footer";
+
 import type { Vocab } from "../../types/vocab";
 import type { Category } from "../../types/category";
 
 const VocabularyPage: React.FC = () => {
   const dispatch = useDispatch<any>();
-  const { vocabs = [], loading = false } = useSelector(
-    (state: any) => state.vocabs || {}
-  );
+  const { vocabs = [], loading = false } = useSelector((state: any) => state.vocabs || {});
   const { categories = [] } = useSelector((state: any) => state.categories || {});
 
   const [modalOpen, setModalOpen] = useState(false);
+  const [deleteModal, setDeleteModal] = useState<null | number>(null);
   const [editVocab, setEditVocab] = useState<Vocab | null>(null);
   const [wordInput, setWordInput] = useState("");
   const [meaningInput, setMeaningInput] = useState("");
@@ -31,13 +34,11 @@ const VocabularyPage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
-  // ==== Fetch data ban đầu ====
   useEffect(() => {
     dispatch(fetchVocabs());
     dispatch(fetchCategories());
   }, [dispatch]);
 
-  // ==== Mở / đóng modal ====
   const openModal = (vocab?: Vocab) => {
     if (vocab) {
       setEditVocab(vocab);
@@ -55,7 +56,6 @@ const VocabularyPage: React.FC = () => {
 
   const closeModal = () => setModalOpen(false);
 
-  // ==== Thêm / sửa từ vựng ====
   const saveVocab = async () => {
     if (!wordInput || !meaningInput || !categoryInput) {
       Swal.fire("Warning", "Please fill all fields!", "warning");
@@ -75,15 +75,16 @@ const VocabularyPage: React.FC = () => {
         Swal.fire("Updated!", "Vocabulary updated successfully!", "success");
       } else {
         await dispatch(
-          addVocab({ word: wordInput, meaning: meaningInput, topic: categoryInput })
+          addVocab({
+            word: wordInput,
+            meaning: meaningInput,
+            topic: categoryInput,
+          })
         ).unwrap();
         Swal.fire("Added!", "Vocabulary added successfully!", "success");
       }
 
-      // Nếu topic mới chưa có trong categories → thêm vào
-      const topicExists = categories.some(
-        (cat: Category) => cat.topic === categoryInput
-      );
+      const topicExists = categories.some((cat: Category) => cat.topic === categoryInput);
       if (!topicExists) {
         await dispatch(addCategory({ name: categoryInput, topic: categoryInput }));
         await dispatch(fetchCategories());
@@ -91,34 +92,20 @@ const VocabularyPage: React.FC = () => {
 
       dispatch(fetchVocabs());
       closeModal();
-    } catch (err) {
+    } catch {
       Swal.fire("Error", "Something went wrong!", "error");
     }
   };
 
-  // ==== Xóa từ ====
-  const removeVocab = (id: number) => {
-    Swal.fire({
-      title: "Are you sure?",
-      text: "This will delete the vocabulary!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "Yes, delete it!",
-      cancelButtonText: "Cancel",
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-        try {
-          await dispatch(deleteVocab(id)).unwrap();
-          Swal.fire("Deleted!", "Vocabulary deleted successfully!", "success");
-          dispatch(fetchVocabs());
-        } catch {
-          Swal.fire("Error", "Failed to delete vocabulary!", "error");
-        }
-      }
-    });
+  const confirmDelete = (id: number) => setDeleteModal(id);
+
+  const handleDelete = async (id: number) => {
+    await dispatch(deleteVocab(id));
+    Swal.fire("Deleted!", "Vocabulary deleted successfully!", "success");
+    dispatch(fetchVocabs());
+    setDeleteModal(null);
   };
 
-  // ==== Lọc ====
   const filtered = vocabs.filter((v: Vocab) => {
     const matchWord = v.word.toLowerCase().includes(search.toLowerCase());
     const matchCategory =
@@ -127,19 +114,13 @@ const VocabularyPage: React.FC = () => {
   });
 
   const totalPages = Math.ceil(filtered.length / itemsPerPage);
-  const displayed = filtered.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
-
-  // ==== Danh sách category duy nhất (có thanh cuộn) ====
+  const displayed = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
   const categoryList = Array.from(new Set(vocabs.map((v: Vocab) => v.topic)));
 
   return (
-    <div className="d-flex flex-column min-vh-100">
-      <main className="flex-fill container mt-5 pt-5">
-        {/* Header + Add */}
-        <div className="d-flex justify-content-between align-items-center mb-2">
+    <div className="d-flex flex-column m-vh-1000 w-full h- full">
+      <main className="flex-fill container mt-5 pt-3">
+        <div className="d-flex justify-content-between align-items-center mb-4">
           <h2 className="fw-bold fs-1 mb-0">Vocabulary Words</h2>
           <button
             style={{
@@ -149,7 +130,6 @@ const VocabularyPage: React.FC = () => {
               fontSize: "1rem",
               border: "none",
               borderRadius: "8px",
-              boxShadow: "0 2px 5px rgba(0,0,0,0.2)",
               cursor: "pointer",
             }}
             onClick={() => openModal()}
@@ -158,7 +138,6 @@ const VocabularyPage: React.FC = () => {
           </button>
         </div>
 
-        {/* Select Category (có thanh cuộn) */}
         <div className="mb-3">
           <div
             style={{
@@ -186,7 +165,6 @@ const VocabularyPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Search */}
         <div className="mb-2">
           <input
             type="text"
@@ -200,53 +178,60 @@ const VocabularyPage: React.FC = () => {
           />
         </div>
 
-        {/* Table */}
         {loading ? (
           <p>Loading...</p>
         ) : (
-          <table className="table table-hover">
-            <thead className="table-light">
-              <tr>
-                <th>Word</th>
-                <th>Meaning</th>
-                <th>Category</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {displayed.map((v: Vocab) => (
-                <tr key={v.id}>
-                  <td>{v.word}</td>
-                  <td>{v.meaning}</td>
-                  <td>{v.topic}</td>
-                  <td>
-                    <span
-                      className="text-primary me-3 action-text"
-                      onClick={() => openModal(v)}
-                    >
-                      Edit
-                    </span>
-                    <span
-                      className="text-danger action-text"
-                      onClick={() => removeVocab(v.id)}
-                    >
-                      Delete
-                    </span>
-                  </td>
-                </tr>
-              ))}
-              {displayed.length === 0 && (
-                <tr>
-                  <td colSpan={4} className="text-center">
-                    No vocabulary found.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+   <table
+  className="table table-borderless"
+  style={{
+    border: "1px solid #e5e7eb", 
+    borderRadius: "8px",
+    boxShadow: "0 4px 8px rgba(0,0,0,0.1)", 
+    overflow: "hidden",
+  }}
+>
+  <thead
+    style={{
+      backgroundColor: "#f3f4f6", 
+      boxShadow: "0 2px 5px rgba(0,0,0,0.1)",
+    }}
+  >
+    <tr>
+      <th style={{ fontWeight: 500, color: "#374151" }}>Word</th>
+      <th style={{ fontWeight: 500, color: "#374151" }}>Meaning</th>
+      <th style={{ fontWeight: 500, color: "#374151" }}>Category</th>
+      <th style={{ fontWeight: 500, color: "#374151" }}>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {displayed.map((v: Vocab) => (
+      <tr key={v.id}>
+        <td>{v.word}</td>
+        <td>{v.meaning}</td>
+        <td>{v.topic}</td>
+        <td>
+          <span
+            className="text-primary me-3"
+            style={{ cursor: "pointer" }}
+            onClick={() => openModal(v)}
+          >
+            Edit
+          </span>
+          <span
+            className="text-danger"
+            style={{ cursor: "pointer" }}
+            onClick={() => confirmDelete(v.id)}
+          >
+            Delete
+          </span>
+        </td>
+      </tr>
+    ))}
+  </tbody>
+</table>
+
         )}
 
-        {/* Pagination */}
         <div className="d-flex justify-content-end mt-3">
           <PaginationAntd
             currentPage={currentPage}
@@ -260,37 +245,34 @@ const VocabularyPage: React.FC = () => {
       {/* Modal thêm/sửa */}
       {modalOpen && (
         <div
-          className="custom-modal-backdrop"
-          onClick={closeModal}
           style={{
             position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
+            inset: 0,
             backgroundColor: "rgba(0,0,0,0.4)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            zIndex: 1050,
+            zIndex: 9999,
           }}
+          onClick={closeModal}
         >
           <div
-            className="custom-modal-dialog"
-            onClick={(e) => e.stopPropagation()}
             style={{
               backgroundColor: "#fff",
-              padding: "20px",
               borderRadius: "10px",
               width: "100%",
               maxWidth: "500px",
+              overflow: "hidden",
             }}
+            onClick={(e) => e.stopPropagation()}
           >
-            <div className="d-flex justify-content-between align-items-center mb-3">
-              <h5>{editVocab ? "Edit Vocabulary" : "Add Vocabulary"}</h5>
-              <button className="btn-close" onClick={closeModal}></button>
+            {/* Tiêu đề */}
+            <div style={{ padding: "16px 20px", borderBottom: "1px solid #e5e7eb" }}>
+              <h5 className="mb-0">{editVocab ? "Edit Vocabulary" : "Add Vocabulary"}</h5>
             </div>
-            <div>
+
+            {/* Nội dung form */}
+            <div style={{ padding: "16px 20px", borderBottom: "1px solid #e5e7eb" }}>
               <label>Word</label>
               <input
                 type="text"
@@ -313,13 +295,46 @@ const VocabularyPage: React.FC = () => {
                 onChange={(e) => setCategoryInput(e.target.value)}
               />
             </div>
-            <div className="d-flex justify-content-end mt-3 gap-2">
-              <button className="btn btn-secondary" onClick={closeModal}>
-                Cancel
-              </button>
-              <button className="btn btn-primary" onClick={saveVocab}>
-                {editVocab ? "Save" : "Add"}
-              </button>
+            <div className="d-flex justify-content-end gap-2" style={{ padding: "16px 20px" }}>
+              <button className="btn btn-secondary" onClick={closeModal}>Cancel</button>
+              <button className="btn btn-primary" onClick={saveVocab}>{editVocab ? "Save" : "Add"}</button>
+            </div>
+          </div>
+        </div>
+      )}
+      {deleteModal && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            backgroundColor: "rgba(0,0,0,0.4)",
+            display: "flex",
+            alignItems: "flex-start",
+            justifyContent: "center",
+            paddingTop: "30px",
+            zIndex: 9999,
+          }}
+          onClick={() => setDeleteModal(null)}
+        >
+          <div
+            style={{
+              backgroundColor: "#fff",
+              borderRadius: "10px",
+              width: "420px",
+              boxShadow: "0 4px 15px rgba(0,0,0,0.2)",
+              overflow: "hidden",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ padding: "16px 20px", borderBottom: "1px solid #e5e7eb" }}>
+              <h6 className="mb-0">Delete Vocabulary</h6>
+            </div>
+            <div style={{ padding: "16px 20px", borderBottom: "1px solid #e5e7eb" }}>
+              <p className="mb-0">Are you sure you want to delete this vocabulary?</p>
+            </div>
+            <div className="d-flex justify-content-end gap-2" style={{ padding: "14px 20px" }}>
+              <button className="btn btn-secondary" onClick={() => setDeleteModal(null)}>Cancel</button>
+              <button className="btn btn-danger" onClick={() => handleDelete(deleteModal!)}>Delete</button>
             </div>
           </div>
         </div>

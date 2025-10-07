@@ -4,7 +4,6 @@ import categoriesReducer from "./slices/categoriesSlice";
 import vocabReducer from "./slices/vocabSLice";
 import flashcardReducer from "./slices/flashcardsSlice";
 import resultReducer from "./slices/resultSlice";
-
 export const store = configureStore({
   reducer: {
     auth: authReducer,

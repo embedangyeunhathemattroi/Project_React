@@ -168,6 +168,46 @@
       "password": "Linh2006@",
       "role": "user",
       "id": 21
+    },
+    {
+      "firstName": "linh",
+      "lastName": "le",
+      "email": "ab@gmail.com",
+      "password": "Linh2006@",
+      "role": "user",
+      "id": 22
+    },
+    {
+      "firstName": "linh",
+      "lastName": "pham",
+      "email": "ngoctq@gmail.com",
+      "password": "Linh2006@",
+      "role": "user",
+      "id": 23
+    },
+    {
+      "firstName": "lan",
+      "lastName": "phan",
+      "email": "lannhu@gmail.com",
+      "password": "Linh2006@",
+      "role": "user",
+      "id": 24
+    },
+    {
+      "firstName": "lan",
+      "lastName": "phan",
+      "email": "laｍ@gmail.com",
+      "password": "Linh2006@",
+      "role": "user",
+      "id": 25
+    },
+    {
+      "firstName": "phạm",
+      "lastName": "Linh",
+      "email": "2006@gmail.com",
+      "password": "Linh2006@",
+      "role": "user",
+      "id": 26
     }
   ],
   "categories": [
@@ -175,7 +215,7 @@
       "id": 1,
       "name": "Động Vật",
       "topic": "Animals",
-      "description": "Các loài động vật phổ biến",
+      "description": "Các loài động vật phổ biến nhất",
       "createdAt": "2024-10-15T10:00:00Z"
     },
     {
@@ -242,10 +282,29 @@
       "createdAt": "2025-05-01T10:00:00Z"
     },
     {
+      "name": "Học Sinh",
+      "description": "học từ lớp 1- lớp 12 ( tiểu học đến THPT)\n\n",
+      "createdAt": "2025-10-06T13:38:52.160Z",
+      "id": 13
+    },
+    {
+      "name": "Sinh viên",
+      "description": "học tại các trường đại học",
+      "topic": "sinh-vin",
+      "createdAt": "2025-10-06T13:49:55.498Z",
+      "id": 14
+    },
+    {
+      "name": "students",
+      "topic": "students",
+      "createdAt": "2025-10-06T13:50:46.916Z",
+      "id": 15
+    },
+    {
       "name": "Animal",
       "topic": "Animal",
-      "createdAt": "2025-10-04T10:25:55.323Z",
-      "id": 11
+      "createdAt": "2025-10-06T13:56:58.521Z",
+      "id": 16
     }
   ],
   "vocabs": [
@@ -660,6 +719,12 @@
       "meaning": "sữa",
       "topic": "Sữa",
       "id": 512
+    },
+    {
+      "word": "Student",
+      "meaning": "học sinh",
+      "topic": "students",
+      "id": 513
     }
   ],
   "question": [
@@ -919,6 +984,84 @@
         }
       ],
       "id": 1759460975212
+    },
+    {
+      "date": "2025-10-06T02:22:18.496Z",
+      "category": "Animal",
+      "score": 3,
+      "total": 5,
+      "answers": [
+        {
+          "questionId": 1,
+          "selected": "Con mèo",
+          "correct": "Con mèo",
+          "isCorrect": true
+        },
+        {
+          "questionId": 2,
+          "selected": "Con chó",
+          "correct": "Con chó",
+          "isCorrect": true
+        },
+        {
+          "questionId": 3,
+          "selected": "Con voi",
+          "correct": "Con voi",
+          "isCorrect": true
+        },
+        {
+          "questionId": 4,
+          "selected": "Sư tử",
+          "correct": "Con hổ",
+          "isCorrect": false
+        },
+        {
+          "questionId": 5,
+          "selected": "Con ngựa",
+          "correct": "Sư tử",
+          "isCorrect": false
+        }
+      ],
+      "id": 1759460975213
+    },
+    {
+      "date": "2025-10-06T08:34:34.956Z",
+      "category": "Animal",
+      "score": 2,
+      "total": 5,
+      "answers": [
+        {
+          "questionId": 1,
+          "selected": "Con mèo",
+          "correct": "Con mèo",
+          "isCorrect": true
+        },
+        {
+          "questionId": 2,
+          "selected": "Con voi",
+          "correct": "Con chó",
+          "isCorrect": false
+        },
+        {
+          "questionId": 3,
+          "selected": "Con thỏ",
+          "correct": "Con voi",
+          "isCorrect": false
+        },
+        {
+          "questionId": 4,
+          "selected": "Con bò",
+          "correct": "Con hổ",
+          "isCorrect": false
+        },
+        {
+          "questionId": 5,
+          "selected": "Sư tử",
+          "correct": "Sư tử",
+          "isCorrect": true
+        }
+      ],
+      "id": 1759460975214
     }
   ]
 }

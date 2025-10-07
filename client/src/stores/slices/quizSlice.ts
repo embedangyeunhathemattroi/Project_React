@@ -1,4 +1,3 @@
-           
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import type { Result, Question } from "../../types/utils";
 import { getResults, postResult, getQuestions } from "../../apis/resultApi";
@@ -6,7 +5,7 @@ import { getResults, postResult, getQuestions } from "../../apis/resultApi";
 interface QuizState {
   questions: Question[];
   currentQuestionIndex: number;
-  userAnswers: string[]; // lưu đáp án người dùng
+  userAnswers: string[];
   results: Result[];
   loading: boolean;
   error: string | null;
@@ -23,7 +22,6 @@ const initialState: QuizState = {
   quizStarted: false,
 };
 
-// Thunks
 export const fetchQuestions = createAsyncThunk(
   "quiz/fetchQuestions",
   async (_, { rejectWithValue }) => {
@@ -76,16 +74,30 @@ const quizSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchQuestions.pending, (state) => { state.loading = true; state.error = null; })
-      .addCase(fetchQuestions.fulfilled, (state, action) => { state.loading = false; state.questions = action.payload; })
-      .addCase(fetchQuestions.rejected, (state, action) => { state.loading = false; state.error = action.payload as string; })
-
-      .addCase(saveQuizResult.pending, (state) => { state.loading = true; state.error = null; })
+      .addCase(fetchQuestions.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchQuestions.fulfilled, (state, action) => {
+        state.loading = false;
+        state.questions = action.payload;
+      })
+      .addCase(fetchQuestions.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(saveQuizResult.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
       .addCase(saveQuizResult.fulfilled, (state, action) => {
         state.loading = false;
         state.results.push(action.payload);
       })
-      .addCase(saveQuizResult.rejected, (state, action) => { state.loading = false; state.error = action.payload as string; });
+      .addCase(saveQuizResult.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      });
   },
 });
 

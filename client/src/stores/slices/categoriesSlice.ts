@@ -8,11 +8,12 @@ import {
 } from "../../apis/categoryApi";
 import type { Category } from "../../types/category";
 interface CategoriesState {
-  categories: Category[];
-  loading: boolean;
-  error: string | null;
-  currentFilter: string; 
+  categories: Category[];  
+  loading: boolean;        
+  error: string | null;    
+  currentFilter: string;  
 }
+
 
 const initialState: CategoriesState = {
   categories: [],
@@ -21,24 +22,22 @@ const initialState: CategoriesState = {
   currentFilter: "All",
 };
 
-// ---------------- THUNKS ----------------
-
 export const fetchCategories = createAsyncThunk(
   "categories/fetch",
-  async (_, { rejectWithValue }) => {
-    try {
-      return await fetchCategoriesApi();
+  async (_, { rejectWithValue }) => { 
+    try { 
+      return await fetchCategoriesApi(); 
     } catch (err: any) {
-      return rejectWithValue(err.message || "Fetch failed");
+      return rejectWithValue(err.message || "Fetch failed"); 
     }
   }
 );
+
 
 export const filterCategories = createAsyncThunk(
   "categories/filter",
   async (topic: string, { rejectWithValue }) => {
     try {
-      // Nếu là "All" thì lấy toàn bộ
       const url =
         topic === "All"
           ? "http://localhost:8080/categories"
@@ -52,7 +51,6 @@ export const filterCategories = createAsyncThunk(
   }
 );
 
-// Thêm danh mục
 export const addCategory = createAsyncThunk(
   "categories/add",
   async (category: { name: string; topic: string }, { rejectWithValue }) => {
@@ -64,7 +62,7 @@ export const addCategory = createAsyncThunk(
   }
 );
 
-// Cập nhật danh mục
+
 export const updateCategory = createAsyncThunk(
   "categories/update",
   async (category: Category, { rejectWithValue }) => {
@@ -77,13 +75,11 @@ export const updateCategory = createAsyncThunk(
 );
 
 
-
-// Xóa danh mục
 export const deleteCategory = createAsyncThunk(
   "categories/delete",
   async (id: number, { rejectWithValue }) => {
     try {
-      await deleteCategoryApi(id);
+      await deleteCategoryApi(id); 
       return id;
     } catch (err: any) {
       return rejectWithValue(err.message || "Delete failed");
@@ -91,32 +87,29 @@ export const deleteCategory = createAsyncThunk(
   }
 );
 
-// ---------------- SLICE ----------------
+
 const categoriesSlice = createSlice({
   name: "categories",
-  initialState,
+  initialState,      
   reducers: {
-    // Gọi khi người dùng chọn bộ lọc mới
     setFilter(state, action) {
       state.currentFilter = action.payload;
     },
   },
   extraReducers: (builder) => {
     builder
-      // Fetch all
       .addCase(fetchCategories.pending, (state) => {
         state.loading = true;
       })
       .addCase(fetchCategories.fulfilled, (state, action) => {
-        state.loading = false;
-        state.categories = action.payload;
+        state.loading = false; 
+        state.categories = action.payload; 
       })
       .addCase(fetchCategories.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       })
 
-      // Filter
       .addCase(filterCategories.pending, (state) => {
         state.loading = true;
       })
@@ -129,19 +122,18 @@ const categoriesSlice = createSlice({
         state.error = action.payload as string;
       })
 
-      // Add
       .addCase(addCategory.fulfilled, (state, action) => {
-        state.categories.push(action.payload);
+        state.categories.push(action.payload); 
+        
       })
 
-      // Update
       .addCase(updateCategory.fulfilled, (state, action) => {
+
         state.categories = state.categories.map((cat) =>
           cat.id === action.payload.id ? action.payload : cat
         );
       })
 
-      // Delete
       .addCase(deleteCategory.fulfilled, (state, action) => {
         state.categories = state.categories.filter(
           (cat) => cat.id !== action.payload
@@ -149,7 +141,5 @@ const categoriesSlice = createSlice({
       });
   },
 });
-
-// ---------------- EXPORT ----------------
 export const { setFilter } = categoriesSlice.actions;
-export default categoriesSlice.reducer;
+export default categoriesSlice.reducer; 

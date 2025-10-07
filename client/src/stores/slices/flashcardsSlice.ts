@@ -1,10 +1,8 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import {  markVocabAsLearnedApi } from "../../apis/FlashcardApi";
-
+import { markVocabAsLearnedApi } from "../../apis/FlashcardApi";
+import { fetchVocabsApi } from "../../apis/vocabApi";
 import type { Category } from "../../types/category";
 import type { Vocab } from "../../types/vocab";
-import { fetchVocabsApi } from "../../apis/vocabApi";
-
 
 interface FlashcardState {
   vocabs: Vocab[];
@@ -24,22 +22,27 @@ const initialState: FlashcardState = {
   filterCategoryId: "All",
 };
 
-// Thunks
-export const fetchVocabs = createAsyncThunk("flashcard/fetchVocabs", async (_, { rejectWithValue }) => {
-  try {
-    return await fetchVocabsApi();
-  } catch (err: any) {
-    return rejectWithValue(err.message || "Failed to fetch vocabs");
+export const fetchVocabs = createAsyncThunk(
+  "flashcard/fetchVocabs",
+  async (_, { rejectWithValue }) => {
+    try {
+      return await fetchVocabsApi();
+    } catch (err: any) {
+      return rejectWithValue(err.message || "Failed to fetch vocabs");
+    }
   }
-});
+);
 
-export const markAsLearned = createAsyncThunk("flashcard/markAsLearned", async (vocab: Vocab, { rejectWithValue }) => {
-  try {
-    return await markVocabAsLearnedApi(vocab);
-  } catch (err: any) {
-    return rejectWithValue(err.message || "Failed to mark as learned");
+export const markAsLearned = createAsyncThunk(
+  "flashcard/markAsLearned",
+  async (vocab: Vocab, { rejectWithValue }) => {
+    try {
+      return await markVocabAsLearnedApi(vocab);
+    } catch (err: any) {
+      return rejectWithValue(err.message || "Failed to mark as learned");
+    }
   }
-});
+);
 
 const flashcardSlice = createSlice({
   name: "flashcard",
@@ -61,18 +64,26 @@ const flashcardSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchVocabs.pending, (state) => { state.loading = true; state.error = null; })
+      .addCase(fetchVocabs.pending, (state) => { 
+        state.loading = true; 
+        state.error = null; 
+      })
       .addCase(fetchVocabs.fulfilled, (state, action) => {
         state.loading = false;
         state.vocabs = action.payload.vocabs;
         state.categories = action.payload.categories;
       })
-      .addCase(fetchVocabs.rejected, (state, action) => { state.loading = false; state.error = action.payload as string; })
+      .addCase(fetchVocabs.rejected, (state, action) => { 
+        state.loading = false; 
+        state.error = action.payload as string; 
+      })
       .addCase(markAsLearned.fulfilled, (state, action) => {
         const index = state.vocabs.findIndex(v => v.id === action.payload.id);
         if (index !== -1) state.vocabs[index].isLearned = true;
       })
-      .addCase(markAsLearned.rejected, (state, action) => { state.error = action.payload as string; });
+      .addCase(markAsLearned.rejected, (state, action) => { 
+        state.error = action.payload as string; 
+      });
   },
 });
 

@@ -1,21 +1,18 @@
-// FlashCardPage.tsx
-import React from "react";
-import axios from "axios";
+import React from "react"; 
+import axios from "axios"; 
 import "./FlashCardPage.css"; 
-import PaginationAntd from "../../components/common/Pagination";
-import Footer from "../../components/common/Footer";
-import FlashCard from "../../components/UI/FlashCard";
-import Swal from "sweetalert2";
-
+import PaginationAntd from "../../components/common/Pagination"; 
+import Footer from "../../components/common/Footer"; 
+import FlashCard from "../../components/UI/FlashCard"; 
+import Swal from "sweetalert2"; 
 interface Vocab {
   id: number;
   word: string;
   meaning: string;
   categoryId: number;
   topic: string;
-  isLearned: boolean;
+  isLearned: boolean; 
 }
-
 interface Category {
   id: number;
   name: string;
@@ -23,15 +20,15 @@ interface Category {
 }
 
 interface State {
-  vocabs: Vocab[];
-  categories: Category[];
-  currentIndex: number;
-  filterCategoryId: number | "All";
-  flipped: boolean;
-  loading: boolean;
-  error: string | null;
-  currentPage: number;
-  pageSize: number;
+  vocabs: Vocab[]; 
+  categories: Category[]; 
+  currentIndex: number; 
+  filterCategoryId: number | "All"; 
+  flipped: boolean; 
+  loading: boolean; 
+  error: string | null; 
+  currentPage: number; 
+  pageSize: number; 
 }
 
 class FlashCardPage extends React.Component<{}, State> {
@@ -48,20 +45,19 @@ class FlashCardPage extends React.Component<{}, State> {
   };
 
   componentDidMount() {
-    this.fetchData();
+    this.fetchData(); 
   }
-
   fetchData = async () => {
-    this.setState({ loading: true });
+    this.setState({ loading: true }); 
     try {
       const [vocabsRes, categoriesRes] = await Promise.all([
-        axios.get<Vocab[]>("http://localhost:8080/vocabs"),
+        axios.get<Vocab[]>("http://localhost:8080/vocabs"), 
         axios.get<Category[]>("http://localhost:8080/categories"),
       ]);
       this.setState({
         vocabs: vocabsRes.data,
         categories: categoriesRes.data,
-        loading: false,
+        loading: false, // tắt loading
       });
     } catch (err: any) {
       this.setState({ error: err.message || "Failed to fetch data", loading: false });
@@ -69,21 +65,19 @@ class FlashCardPage extends React.Component<{}, State> {
   };
 
   handleFlip = () => {
-    this.setState({ flipped: !this.state.flipped });
+    this.setState({ flipped: !this.state.flipped }); 
   };
 
   handleNext = () => {
-    const filtered = this.getFilteredVocabs().filter(v => !v.isLearned);
-    if (this.state.currentIndex >= filtered.length - 1) {
-      // Hết từ
-      if (filtered.length > 0) {
+    const filtered = this.getFilteredVocabs().filter(v => !v.isLearned); 
+    if (this.state.currentIndex >= filtered.length - 1) { 
+      if (filtered.length > 0) { 
         Swal.fire({
           icon: "info",
           title: "Bạn vẫn chưa học hết!",
           text: `Bạn còn ${filtered.length} từ chưa học. Cố gắng lần sau nhé 🚀`,
         });
-      } else {
-        // Học xong tất cả
+      } else { 
         Swal.fire({
           title: "Chúc mừng 🎉",
           text: "Bạn đã học xong toàn bộ bài!",
@@ -96,11 +90,10 @@ class FlashCardPage extends React.Component<{}, State> {
     } else {
       this.setState(prev => ({
         currentIndex: Math.min(prev.currentIndex + 1, filtered.length - 1),
-        flipped: false,
+        flipped: false, 
       }));
     }
   };
-
   handlePrevious = () => {
     if (this.state.currentIndex === 0) {
       Swal.fire({
@@ -112,10 +105,9 @@ class FlashCardPage extends React.Component<{}, State> {
     }
     this.setState(prev => ({
       currentIndex: Math.max(prev.currentIndex - 1, 0),
-      flipped: false,
+      flipped: false, 
     }));
   };
-
   handleMarkLearned = () => {
     const filtered = this.getFilteredVocabs().filter(v => !v.isLearned);
     const current = filtered[this.state.currentIndex];
@@ -127,9 +119,8 @@ class FlashCardPage extends React.Component<{}, State> {
         const unlearned = updatedVocabs.filter(v => 
           !v.isLearned && (prev.filterCategoryId === "All" || v.categoryId === prev.filterCategoryId)
         );
-        const newIndex = Math.min(prev.currentIndex, Math.max(unlearned.length - 1, 0));
 
-        // Nếu học xong hết
+        const newIndex = Math.min(prev.currentIndex, Math.max(unlearned.length - 1, 0));
         if (unlearned.length === 0) {
           Swal.fire({
             title: "Tuyệt vời 🎇",
@@ -148,18 +139,15 @@ class FlashCardPage extends React.Component<{}, State> {
       });
     }
   };
-
   handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value === "All" ? "All" : Number(e.target.value);
     this.setState({ filterCategoryId: value, currentIndex: 0, flipped: false, currentPage: 1 });
   };
-
   getFilteredVocabs = () => {
     const { vocabs, filterCategoryId } = this.state;
     if (filterCategoryId === "All") return vocabs;
     return vocabs.filter(v => v.categoryId === filterCategoryId);
   };
-
   getPagedVocabs = () => {
     const { currentPage, pageSize } = this.state;
     const filtered = this.getFilteredVocabs().filter(v => !v.isLearned);
@@ -170,17 +158,17 @@ class FlashCardPage extends React.Component<{}, State> {
 
   render() {
     const { categories, currentIndex, flipped, loading, error, currentPage, pageSize } = this.state;
-    const filteredVocabs = this.getFilteredVocabs();
-    const unlearnedVocabs = filteredVocabs.filter(v => !v.isLearned);
-    const currentVocab = unlearnedVocabs[currentIndex] || null;
-    const pagedVocabs = this.getPagedVocabs();
+    const filteredVocabs = this.getFilteredVocabs(); // vocabs theo filter
+    const unlearnedVocabs = filteredVocabs.filter(v => !v.isLearned); 
+    const currentVocab = unlearnedVocabs[currentIndex] || null; // từ hiện tại
+    const pagedVocabs = this.getPagedVocabs(); 
 
     const totalUnlearned = unlearnedVocabs.length;
     const learnedCount = filteredVocabs.length - totalUnlearned;
-    const progressPercent = filteredVocabs.length === 0 ? 0 : (learnedCount / filteredVocabs.length) * 100;
+    const progressPercent = filteredVocabs.length === 0 ? 0 : (learnedCount / filteredVocabs.length) * 100; // % tiến độ
 
-    if (loading) return <div className="container mt-5">Loading...</div>;
-    if (error) return <div className="container mt-5 text-danger">{error}</div>;
+    if (loading) return <div className="container mt-5">Loading...</div>; // loading
+    if (error) return <div className="container mt-5 text-danger">{error}</div>; // hiển thị lỗi
 
     return (
       <div className="d-flex flex-column min-vh-100">
@@ -194,18 +182,29 @@ class FlashCardPage extends React.Component<{}, State> {
           </select>
 
           {/* Flashcard */}
-          <div className="flashcard-container mb-3 d-flex justify-content-center">
+          <div className="flashcard-container mb-3">
             {currentVocab ? (
               <FlashCard
                 word={currentVocab.word}
                 meaning={currentVocab.meaning}
                 flipped={flipped}
                 onFlip={this.handleFlip}
-                width="400px"
-                height="250px"
+                width="100%"
+                height="300px"
               />
             ) : (
-              <h5>No words available</h5>
+              <div style={{
+                width: "100%",
+                height: "300px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: "white",
+                borderRadius: "8px",
+                boxShadow: "0 4px 6px rgba(0,0,0,0.1)"
+              }}>
+                <h5>No words available</h5>
+              </div>
             )}
           </div>
 

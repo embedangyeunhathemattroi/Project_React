@@ -1,12 +1,11 @@
 import React from "react";
-
 interface FlashCardProps {
-  word: string;
-  meaning: string;
-  flipped: boolean;
-  onFlip: () => void;
-  width?: string;
-  height?: string;
+  word: string;         
+  meaning: string;       
+  flipped: boolean;      
+  onFlip: () => void;    
+  width?: string;        
+  height?: string;     
 }
 
 const FlashCard: React.FC<FlashCardProps> = ({
@@ -34,31 +33,28 @@ const FlashCard: React.FC<FlashCardProps> = ({
           position: "relative",
           textAlign: "center",
           transition: "transform 0.6s",
-          transformStyle: "preserve-3d",
-          transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)",
+          transformStyle: "preserve-3d", 
+          transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)", 
         }}
       >
-        {/* Front */}
         <div
           style={{
             position: "absolute",
             width: "100%",
             height: "100%",
-            backfaceVisibility: "hidden",
+            backfaceVisibility: "hidden", 
             borderRadius: "15px",
-            backgroundColor: "#fff",
+            backgroundColor: "#fff", 
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
-            boxShadow: "0 8px 20px rgba(0,0,0,0.3)",
+            boxShadow: "0 8px 20px rgba(0,0,0,0.3)", // Đổ bóng
             fontSize: "1.8rem",
             fontWeight: "bold",
           }}
         >
           {word}
         </div>
-
-        {/* Back */}
         <div
           style={{
             position: "absolute",
@@ -66,17 +62,17 @@ const FlashCard: React.FC<FlashCardProps> = ({
             height: "100%",
             backfaceVisibility: "hidden",
             borderRadius: "15px",
-            backgroundColor: "#d9f7be",
+            backgroundColor: "#d9f7be", 
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
             boxShadow: "0 8px 20px rgba(0,0,0,0.3)",
             fontSize: "1.8rem",
             fontWeight: "bold",
-            transform: "rotateY(180deg)",
+            transform: "rotateY(180deg)", 
           }}
         >
-          {meaning}
+          {meaning} 
         </div>
       </div>
     </div>

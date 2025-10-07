@@ -1,79 +1,74 @@
-import React, { useEffect, useState } from "react";
-import { Card, Select, Button, Radio, Progress, Table, Spin, Pagination, Modal, Input, Form, Row, Col } from "antd";
-import Swal from "sweetalert2";
-import Footer from "../../components/common/Footer";
-import { fetchResults, type Result } from "../../stores/slices/resultSlice";
-import { useAppDispatch, useAppSelector } from "../../hook/hooks";
+import React, { useEffect, useState } from "react"; 
+import { Card, Select, Button, Radio, Progress, Table, Spin, Pagination, Modal, Input, Form, Row, Col } from "antd"; 
+import Swal from "sweetalert2"; 
+import Footer from "../../components/common/Footer"; 
+import { fetchResults, type Result } from "../../stores/slices/resultSlice"; 
+import { useAppDispatch, useAppSelector } from "../../hook/hooks"; 
 
-const { Option } = Select;
-
+const { Option } = Select; 
 interface Question {
-  id: number;
-  question: string;
-  options: string[];
-  answer: string;
-  category: string;
+  id: number;         
+  question: string;    
+  options: string[];   
+  answer: string;      
+  category: string; 
 }
 
 interface AnswerRecord {
-  questionId: number;
-  selected: string;
-  correct: string;
-  isCorrect: boolean;
+  questionId: number; 
+  selected: string;     
+  correct: string;     
+  isCorrect: boolean;  
 }
 
+
 const QuizPage: React.FC = () => {
-  const dispatch = useAppDispatch();
-  const { results, loading } = useAppSelector(state => state.result);
+  const dispatch = useAppDispatch(); 
+  const { results, loading } = useAppSelector(state => state.result); 
+  const [questions, setQuestions] = useState<Question[]>([]); 
+  const [selectedCategory, setSelectedCategory] = useState("All Categories"); 
+  const [quizStarted, setQuizStarted] = useState(false); 
+  const [currentIndex, setCurrentIndex] = useState(0); 
+  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null); 
+  const [answers, setAnswers] = useState<AnswerRecord[]>([]); 
 
-  const [questions, setQuestions] = useState<Question[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState("All Categories");
-  const [quizStarted, setQuizStarted] = useState(false);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
-  const [answers, setAnswers] = useState<AnswerRecord[]>([]);
-  const [score, setScore] = useState(0);
-  const [quizFinished, setQuizFinished] = useState(false);
+  const [score, setScore] = useState(0); 
+  const [quizFinished, setQuizFinished] = useState(false); 
+  const [currentPage, setCurrentPage] = useState(1); 
+  const pageSize = 5; 
+  const [manageMode, setManageMode] = useState(false); 
 
-  // Pagination
-  const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 5;
+  const [modalVisible, setModalVisible] = useState(false); 
 
-  // Manage Questions
-  const [manageMode, setManageMode] = useState(false);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
-  const [form] = Form.useForm();
-  const [searchText, setSearchText] = useState("");
+  const [editingQuestion, setEditingQuestion] = useState<Question | null>(null); 
+  const [form] = Form.useForm(); 
 
+  const [searchText, setSearchText] = useState(""); 
   useEffect(() => {
     const fetchQ = async () => {
       try {
-        const res = await fetch("http://localhost:8080/question");
-        const data = await res.json();
+        const res = await fetch("http://localhost:8080/question"); 
+        const data = await res.json(); 
         setQuestions(data);
       } catch (err) {
-        console.error(err);
+        console.error(err); 
       }
     };
-    fetchQ();
-    dispatch(fetchResults());
+    fetchQ(); 
+    dispatch(fetchResults()); 
+
   }, [dispatch]);
 
-  // Filter questions
   const filteredQuestions = questions.filter(q =>
     (selectedCategory === "All Categories" || q.category === selectedCategory) &&
     q.question.toLowerCase().includes(searchText.toLowerCase())
   );
-
-  // Progress calculation
-  const answeredCount = answers.length;
-  const totalQuestions = filteredQuestions.length;
+  const answeredCount = answers.length; 
+  const totalQuestions = filteredQuestions.length; 
   const quizProgress = totalQuestions > 0 ? Math.round((answeredCount / totalQuestions) * 100) : 0;
 
-  const currentAnswerRecord = answers.find(a => a.questionId === filteredQuestions[currentIndex]?.id);
+  const currentAnswerRecord = answers.find(a => a.questionId === filteredQuestions[currentIndex]?.id); 
 
-  // Quiz Handlers
   const handleStartQuiz = () => {
     setQuizStarted(true);
     setCurrentIndex(0);
@@ -81,22 +76,25 @@ const QuizPage: React.FC = () => {
     setAnswers([]);
     setScore(0);
     setQuizFinished(false);
+
   };
 
   const handlePrev = () => {
     if (currentIndex > 0) {
-      setCurrentIndex(prev => prev - 1);
+      setCurrentIndex(prev => prev - 1); 
+
       const prevAnswer = answers.find(a => a.questionId === filteredQuestions[currentIndex - 1]?.id);
-      setSelectedAnswer(prevAnswer?.selected || null);
+      setSelectedAnswer(prevAnswer?.selected || null); 
+
     }
   };
 
   const handleNext = async () => {
     const currentQuestion = filteredQuestions[currentIndex];
-    if (!selectedAnswer && !quizFinished) return;
+    if (!selectedAnswer && !quizFinished) return; 
 
-    const isCorrect = selectedAnswer === currentQuestion.answer;
-    if (!quizFinished && isCorrect) setScore(prev => prev + 1);
+    const isCorrect = selectedAnswer === currentQuestion.answer; 
+    if (!quizFinished && isCorrect) setScore(prev => prev + 1); 
 
     if (!quizFinished) {
       setAnswers(prev => [
@@ -107,22 +105,21 @@ const QuizPage: React.FC = () => {
           correct: currentQuestion.answer,
           isCorrect,
         }
-      ]);
+      ]); 
     }
 
-    setSelectedAnswer(null);
+    setSelectedAnswer(null); 
 
     if (currentIndex < filteredQuestions.length - 1) {
-      setCurrentIndex(prev => prev + 1);
+      setCurrentIndex(prev => prev + 1); 
+
     } else {
-      // Finish Quiz
       setQuizFinished(true);
       setQuizStarted(false);
 
-      const finalScore = score + (isCorrect ? 1 : 0);
+      const finalScore = score + (isCorrect ? 1 : 0); 
       const percent = Math.round((finalScore / totalQuestions) * 100);
 
-      // SweetAlert result
       Swal.fire({
         title: percent >= 70 ? "Great Job! " : "Keep Trying! ",
         html: `
@@ -145,7 +142,6 @@ const QuizPage: React.FC = () => {
         width: 600
       });
 
-      // Send result to server
       try {
         await fetch("http://localhost:8080/results", {
           method: "POST",
@@ -161,21 +157,23 @@ const QuizPage: React.FC = () => {
             ]
           })
         });
-        dispatch(fetchResults());
+        dispatch(fetchResults()); 
+ 
       } catch (err) {
         console.error("Failed to save result:", err);
       }
     }
   };
 
-  // Manage Questions
+
   const handleAddQuestion = () => {
-    setEditingQuestion(null);
-    form.resetFields();
-    setModalVisible(true);
+    setEditingQuestion(null); 
+    form.resetFields(); 
+    setModalVisible(true); 
   };
+
   const handleEditQuestion = (question: Question) => {
-    setEditingQuestion(question);
+    setEditingQuestion(question); 
     form.setFieldsValue({
       question: question.question,
       category: question.category,
@@ -184,6 +182,7 @@ const QuizPage: React.FC = () => {
     });
     setModalVisible(true);
   };
+
   const handleDeleteQuestion = (id: number) => {
     Swal.fire({
       title: "Are you sure?",
@@ -193,11 +192,12 @@ const QuizPage: React.FC = () => {
       confirmButtonText: "Yes, delete it!"
     }).then(result => {
       if (result.isConfirmed) {
-        setQuestions(prev => prev.filter(q => q.id !== id));
+        setQuestions(prev => prev.filter(q => q.id !== id)); 
         Swal.fire("Deleted!", "Question has been deleted.", "success");
       }
     });
   };
+
   const handleModalOk = () => {
     form.validateFields().then(values => {
       const newQuestion: Question = {
@@ -218,6 +218,7 @@ const QuizPage: React.FC = () => {
     });
   };
 
+  // ----- Render -----
   return (
     <div style={{ maxWidth: '100%', padding: 10, margin: "20px auto", minHeight: "80vh", display: "flex", flexDirection: "column" }}>
       {/* Header */}
@@ -235,7 +236,6 @@ const QuizPage: React.FC = () => {
         </Col>
       </Row>
 
-      {/* Manage Questions */}
       {manageMode && (
         <Card style={{ marginBottom: 20 }}>
           <Row gutter={16} align="middle">
@@ -309,7 +309,7 @@ const QuizPage: React.FC = () => {
         </Card>
       )}
 
-      {/* Quiz Section */}
+
       {!manageMode && (
         <>
           <Select
@@ -324,11 +324,12 @@ const QuizPage: React.FC = () => {
             ))}
           </Select>
 
-          {/* Progress */}
+
           {quizStarted && (
             <Progress percent={quizProgress} style={{ marginBottom: 20 }} />
           )}
 
+    
           {filteredQuestions.length > 0 && (quizStarted || quizFinished) && (
             <Card style={{ width: "100%", boxShadow: "0 4px 8px rgba(0,0,0,0.1)", marginBottom: 20 }}>
               <h3 style={{
@@ -363,11 +364,6 @@ const QuizPage: React.FC = () => {
                       disabled={quizFinished || !!record}
                     >
                       {opt}
-                      {record && (correct || wrong) && (
-                        <span style={{ marginLeft: 10, color: correct ? "green" : "red" }}>
-                   
-                        </span>
-                      )}
                     </Radio>
                   );
                 })}
@@ -381,7 +377,7 @@ const QuizPage: React.FC = () => {
             </Card>
           )}
 
-          {/* Navigation */}
+
           {quizStarted && (
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 20 }}>
               <Button onClick={handlePrev} disabled={currentIndex === 0}>Prev</Button>
@@ -391,7 +387,7 @@ const QuizPage: React.FC = () => {
             </div>
           )}
 
-          {/* Quiz History */}
+
           <h3>Quiz History</h3>
           {loading ? <Spin /> : (
             <>
@@ -419,6 +415,7 @@ const QuizPage: React.FC = () => {
         </>
       )}
 
+   
       <div style={{ marginTop: "auto" }}>
         <Footer />
       </div>

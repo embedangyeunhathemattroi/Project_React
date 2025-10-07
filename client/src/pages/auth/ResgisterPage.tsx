@@ -4,9 +4,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Swal from "sweetalert2";
 import Navbar from "../../components/common/Navbar";
-
 const API_URL = "http://localhost:8080/users";
-
 const RegisterPage: React.FC = () => {
   const navigate = useNavigate();
   const [form, setForm] = useState({ firstName: "", lastName: "", email: "", password: "", confirmPassword: "" });
@@ -55,11 +53,10 @@ const RegisterPage: React.FC = () => {
         password: form.password,
         role: "user",
       });
-
       Swal.fire({
         icon: "success",
         title: "Đăng ký thành công!",
-      }).then(() => navigate("/login")); // tự chuyển sang login
+      }).then(() => navigate("/login")); 
     } catch (err) {
       Swal.fire({ icon: "error", title: "Đăng ký thất bại!", text: "Vui lòng thử lại." });
     }

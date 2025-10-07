@@ -92,7 +92,7 @@ const HomePage: React.FC = () => {
       </header>
 
       {/* Main */}
-      <main className="flex-fill container mt-5">
+      <main className="flex-fill  ">
         {/* Landing */}
         {!isAuthenticated && showLanding && (
           <LandingPage onGetStarted={handleGetStarted} onCreateAccount={handleCreateAccount} />

@@ -1,33 +1,38 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react"; 
 import { Modal, Card, Radio, Progress, Button } from "antd";
-import Swal from "sweetalert2";
+import Swal from "sweetalert2"; 
 
 interface Question {
-  id: number;
-  question: string;
+  id: number; 
+  question: string; 
   options: string[];
-  answer: string;
-  category: string;
+  answer: string; 
+  category: string; 
 }
-
 interface AnswerRecord {
-  questionId: number;
+  questionId: number; 
   selected: string;
-  correct: string;
-  isCorrect: boolean;
+  correct: string; 
+  isCorrect: boolean; 
 }
 
 interface QuizModalProps {
-  visible: boolean;
-  onClose: () => void;
-  questions: Question[];
-  category: string;
-  onSaveResult: (score: number, answers: AnswerRecord[]) => void;
+  visible: boolean; 
+  onClose: () => void; 
+  questions: Question[]; 
+  category: string; 
+  onSaveResult: (score: number, answers: AnswerRecord[]) => void; 
 }
 
-const QuizModal: React.FC<QuizModalProps> = ({ visible, onClose, questions, category, onSaveResult }) => {
+const QuizModal: React.FC<QuizModalProps> = ({
+  visible,
+  onClose,
+  questions,
+  category,
+  onSaveResult
+}) => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
+  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null); 
   const [answers, setAnswers] = useState<AnswerRecord[]>([]);
   const [score, setScore] = useState(0);
 
@@ -40,12 +45,11 @@ const QuizModal: React.FC<QuizModalProps> = ({ visible, onClose, questions, cate
     }
   }, [visible]);
 
-  const currentQuestion = questions[currentIndex];
-  const currentAnswerRecord = answers.find(a => a.questionId === currentQuestion?.id);
+  const currentQuestion = questions[currentIndex]; 
+  const currentAnswerRecord = answers.find(a => a.questionId === currentQuestion?.id); 
 
   const handleNext = () => {
     if (!selectedAnswer && !currentAnswerRecord) return;
-
     const isCorrect = selectedAnswer === currentQuestion.answer;
     const newAnswer: AnswerRecord = {
       questionId: currentQuestion.id,
@@ -53,22 +57,20 @@ const QuizModal: React.FC<QuizModalProps> = ({ visible, onClose, questions, cate
       correct: currentQuestion.answer,
       isCorrect,
     };
-
     const updatedAnswers = [
       ...answers.filter(a => a.questionId !== currentQuestion.id),
       newAnswer
     ];
     setAnswers(updatedAnswers);
     if (isCorrect) setScore(prev => prev + 1);
-
     setSelectedAnswer(null);
 
     if (currentIndex < questions.length - 1) {
       setCurrentIndex(prev => prev + 1);
     } else {
-      // Quiz finished
       const finalScore = updatedAnswers.filter(a => a.isCorrect).length;
       const percent = (finalScore / questions.length) * 100;
+
       const imgUrl = percent >= 70
         ? "https://img.powerpoint.com.vn/uploads/2024/01/27/nhung-hinh-anh-vui-nhon-chen-vao-powerpoint-98_042701237.gif"
         : "https://i.pinimg.com/originals/0e/33/30/0e3330287169a30f2df9ce0d137f7031.gif";
@@ -128,17 +130,19 @@ const QuizModal: React.FC<QuizModalProps> = ({ visible, onClose, questions, cate
     <Modal
       title={`Vocabulary Quiz - ${category}`}
       open={visible}
-      footer={null}
+      footer={null} 
       onCancel={onClose}
       width={700}
     >
       {questions.length > 0 && currentQuestion && (
         <>
+
           <Progress percent={quizProgress} style={{ marginBottom: 20 }} />
           <Card style={{ marginBottom: 20 }}>
             <h3 style={{ backgroundColor: currentAnswerRecord ? "#e6f7e6" : "transparent", padding:"5px 10px", borderRadius:4 }}>
               {currentQuestion.question}
             </h3>
+
             <Radio.Group
               value={selectedAnswer || currentAnswerRecord?.selected || null}
               onChange={e => setSelectedAnswer(e.target.value)}
@@ -173,6 +177,7 @@ const QuizModal: React.FC<QuizModalProps> = ({ visible, onClose, questions, cate
               })}
             </Radio.Group>
           </Card>
+
           <div style={{ display:"flex", justifyContent:"space-between" }}>
             <Button onClick={handlePrev} disabled={currentIndex===0}>Prev</Button>
             <Button type="primary" onClick={handleNext}>
@@ -185,4 +190,4 @@ const QuizModal: React.FC<QuizModalProps> = ({ visible, onClose, questions, cate
   );
 };
 
-export default QuizModal;
+export default QuizModal; 
