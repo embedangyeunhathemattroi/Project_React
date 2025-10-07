@@ -57,54 +57,103 @@ const VocabularyPage: React.FC = () => {
   const closeModal = () => setModalOpen(false);
 
   const saveVocab = async () => {
-    if (!wordInput || !meaningInput || !categoryInput) {
-      Swal.fire("Warning", "Please fill all fields!", "warning");
-      return;
+  const trimmedWord = wordInput.trim();
+  const trimmedMeaning = meaningInput.trim();
+  const trimmedCategory = categoryInput.trim();
+
+  // Kiểm tra rỗng
+  if (!trimmedWord || !trimmedMeaning || !trimmedCategory) {
+    Swal.fire({
+      icon: "warning",
+      title: "Oops...",
+      text: "Please fill all fields!",
+      toast: true,
+      position: "top-end",
+      showConfirmButton: false,
+      timer: 2000,
+      timerProgressBar: true,
+    });
+    return;
+  }
+
+  // Kiểm tra trùng word trong cùng category
+  const exists = vocabs.some(
+    (v: Vocab) =>
+      v.word.trim().toLowerCase() === trimmedWord.toLowerCase() &&
+      v.topic === trimmedCategory &&
+      (!editVocab || v.id !== editVocab.id)
+  );
+  if (exists) {
+    Swal.fire({
+      icon: "warning",
+      title: "Oops...",
+      text: `Word "${trimmedWord}" already exists in this category!`,
+      toast: true,
+      position: "top-end",
+      showConfirmButton: false,
+      timer: 2000,
+      timerProgressBar: true,
+    });
+    return;
+  }
+
+  try {
+    if (editVocab) {
+      await dispatch(
+        updateVocab({
+          ...editVocab,
+          word: trimmedWord,
+          meaning: trimmedMeaning,
+          topic: trimmedCategory,
+        })
+      ).unwrap();
+      Swal.fire("Updated!", `Vocabulary "${trimmedWord}" updated successfully!`, "success");
+    } else {
+      await dispatch(
+        addVocab({
+          word: trimmedWord,
+          meaning: trimmedMeaning,
+          topic: trimmedCategory,
+        })
+      ).unwrap();
+      Swal.fire("Added!", `Vocabulary "${trimmedWord}" added successfully!`, "success");
     }
 
-    try {
-      if (editVocab) {
-        await dispatch(
-          updateVocab({
-            ...editVocab,
-            word: wordInput,
-            meaning: meaningInput,
-            topic: categoryInput,
-          })
-        ).unwrap();
-        Swal.fire("Updated!", "Vocabulary updated successfully!", "success");
-      } else {
-        await dispatch(
-          addVocab({
-            word: wordInput,
-            meaning: meaningInput,
-            topic: categoryInput,
-          })
-        ).unwrap();
-        Swal.fire("Added!", "Vocabulary added successfully!", "success");
-      }
-
-      const topicExists = categories.some((cat: Category) => cat.topic === categoryInput);
-      if (!topicExists) {
-        await dispatch(addCategory({ name: categoryInput, topic: categoryInput }));
-        await dispatch(fetchCategories());
-      }
-
-      dispatch(fetchVocabs());
-      closeModal();
-    } catch {
-      Swal.fire("Error", "Something went wrong!", "error");
+    // Nếu category chưa tồn tại thì tự động thêm mới
+    const topicExists = categories.some((cat: Category) => cat.topic === trimmedCategory);
+    if (!topicExists) {
+      await dispatch(addCategory({ name: trimmedCategory, topic: trimmedCategory })).unwrap();
+      await dispatch(fetchCategories());
     }
-  };
+
+    await dispatch(fetchVocabs());
+    closeModal();
+    setEditVocab(null);
+    setWordInput("");
+    setMeaningInput("");
+    setCategoryInput("");
+  } catch (err: any) {
+    console.error(err);
+    Swal.fire("Error", err.message || "Operation failed", "error");
+  }
+};
+
+// Xóa giống kiểu Cate: confirm modal riêng
+const handleDelete = async (id: number) => {
+  try {
+    await dispatch(deleteVocab(id)).unwrap();
+    await dispatch(fetchVocabs());
+    Swal.fire("Deleted!", "Vocabulary deleted successfully!", "success");
+    setDeleteModal(null);
+  } catch (err: any) {
+    console.error(err);
+    Swal.fire("Error", err.message || "Delete failed", "error");
+  }
+};
+
 
   const confirmDelete = (id: number) => setDeleteModal(id);
 
-  const handleDelete = async (id: number) => {
-    await dispatch(deleteVocab(id));
-    Swal.fire("Deleted!", "Vocabulary deleted successfully!", "success");
-    dispatch(fetchVocabs());
-    setDeleteModal(null);
-  };
 
   const filtered = vocabs.filter((v: Vocab) => {
     const matchWord = v.word.toLowerCase().includes(search.toLowerCase());
@@ -184,15 +233,15 @@ const VocabularyPage: React.FC = () => {
    <table
   className="table table-borderless"
   style={{
-    border: "1px solid #e5e7eb", 
+    border: "1px solid #e5e7eb", // tạo khung viền nhẹ cho table
     borderRadius: "8px",
-    boxShadow: "0 4px 8px rgba(0,0,0,0.1)", 
+    boxShadow: "0 4px 8px rgba(0,0,0,0.1)", // đổ bóng nhẹ
     overflow: "hidden",
   }}
 >
   <thead
     style={{
-      backgroundColor: "#f3f4f6", 
+      backgroundColor: "#f3f4f6", // nền hơi sáng để tiêu đề nổi bật
       boxShadow: "0 2px 5px rgba(0,0,0,0.1)",
     }}
   >
@@ -295,6 +344,8 @@ const VocabularyPage: React.FC = () => {
                 onChange={(e) => setCategoryInput(e.target.value)}
               />
             </div>
+
+            {/* Nút */}
             <div className="d-flex justify-content-end gap-2" style={{ padding: "16px 20px" }}>
               <button className="btn btn-secondary" onClick={closeModal}>Cancel</button>
               <button className="btn btn-primary" onClick={saveVocab}>{editVocab ? "Save" : "Add"}</button>
@@ -302,6 +353,8 @@ const VocabularyPage: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Modal xóa */}
       {deleteModal && (
         <div
           style={{

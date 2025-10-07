@@ -12,6 +12,7 @@ const Dashboard: React.FC = () => {
   const handleCreateAccount = () => {
     navigate("/register");
   };
+
   useEffect(() => {
     document.body.style.margin = "0";
     document.body.style.padding = "0";
@@ -24,8 +25,8 @@ const Dashboard: React.FC = () => {
     <div
       className="container-fluid text-center d-flex flex-column justify-content-center align-items-center"
       style={{
-        minHeight: "100vh", 
-        backgroundColor: "#F3F4F6", 
+        minHeight: "100vh",
+        backgroundColor: "#F3F4F6",
         padding: 0,
         margin: 0,
       }}
@@ -82,3 +83,5 @@ const Dashboard: React.FC = () => {
     </div>
   );
 };
+
+export default Dashboard;

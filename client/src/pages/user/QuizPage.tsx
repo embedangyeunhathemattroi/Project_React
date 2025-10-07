@@ -198,25 +198,50 @@ const QuizPage: React.FC = () => {
     });
   };
 
-  const handleModalOk = () => {
-    form.validateFields().then(values => {
-      const newQuestion: Question = {
-        id: editingQuestion ? editingQuestion.id : Date.now(),
-        question: values.question,
-        category: values.category,
-        answer: values.answer,
-        options: values.options.split(",").map((o: string) => o.trim())
-      };
-      if (editingQuestion) {
-        setQuestions(prev => prev.map(q => q.id === editingQuestion.id ? newQuestion : q));
-        Swal.fire("Updated!", "Question has been updated.", "success");
-      } else {
-        setQuestions(prev => [...prev, newQuestion]);
-        Swal.fire("Added!", "Question has been added.", "success");
-      }
-      setModalVisible(false);
-    });
-  };
+ const handleModalOk = () => {
+  form.validateFields().then(values => {
+    const newQuestionText = values.question.trim();
+    const newCategory = values.category.trim();
+
+    const exists = questions.some(q =>
+      q.question.trim().toLowerCase() === newQuestionText.toLowerCase() &&
+      q.category === newCategory &&
+      (!editingQuestion || q.id !== editingQuestion.id)
+    );
+
+    if (exists) {
+      Swal.fire({
+        icon: "warning",
+        title: "Oops...",
+        text: `Question already exists in category "${newCategory}"!`,
+        toast: true,
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 2000,
+        timerProgressBar: true,
+      });
+      return;
+    }
+
+    const newQuestion: Question = {
+      id: editingQuestion ? editingQuestion.id : Date.now(),
+      question: newQuestionText,
+      category: newCategory,
+      answer: values.answer,
+      options: values.options.split(",").map((o: string) => o.trim())
+    };
+
+    if (editingQuestion) {
+      setQuestions(prev => prev.map(q => q.id === editingQuestion.id ? newQuestion : q));
+      Swal.fire("Updated!", "Question has been updated.", "success");
+    } else {
+      setQuestions(prev => [...prev, newQuestion]);
+      Swal.fire("Added!", "Question has been added.", "success");
+    }
+
+    setModalVisible(false);
+  });
+};
 
   // ----- Render -----
   return (

@@ -6,11 +6,12 @@ import LoginPage from "../../../pages/auth/LoginPage";
 import RegisterPage from "../../forms/RegisterForm";
 import HomePage from "../../../pages/auth/HomePage";
 
-import Dashboard from "../../../pages/user/Dashboard";
+
 import FlashCardPage from "../../../pages/user/FlashcardPage";
 import VocabularyPage from "../../../pages/admin/VocabularyPage";
 import QuizPage from "../../../pages/user/QuizPage";
 import Cate from "../../../pages/admin/Cate";
+import Dashboard from "../../../pages/user/Dashboard";
 
 const AppRouter: React.FC = () => {
   return (

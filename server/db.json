@@ -213,15 +213,15 @@
   "categories": [
     {
       "id": 1,
-      "name": "Động Vật",
-      "topic": "Animals",
+      "name": "Con Vật",
+      "topic": "con-vt",
       "description": "Các loài động vật phổ biến nhất",
       "createdAt": "2024-10-15T10:00:00Z"
     },
     {
       "id": 2,
       "name": "Hành Động",
-      "topic": "Action",
+      "topic": "hnh-ng",
       "description": "Các từ vựng về hành động",
       "createdAt": "2025-03-15T10:00:00Z"
     },
@@ -295,31 +295,24 @@
       "id": 14
     },
     {
-      "name": "students",
-      "topic": "students",
-      "createdAt": "2025-10-06T13:50:46.916Z",
-      "id": 15
+      "name": "Động Từ",
+      "description": "Các động từ cơ bản",
+      "topic": "ng-t",
+      "createdAt": "2025-10-07T09:57:08.346Z",
+      "id": 17
     },
     {
       "name": "Animal",
       "topic": "Animal",
-      "createdAt": "2025-10-06T13:56:58.521Z",
-      "id": 16
+      "createdAt": "2025-10-07T10:02:31.684Z",
+      "id": 18
     }
   ],
   "vocabs": [
     {
       "id": 101,
-      "word": "Cats",
+      "word": "Cat",
       "meaning": "Con mèo",
-      "categoryId": 1,
-      "isLearned": false,
-      "topic": "Animal"
-    },
-    {
-      "id": 102,
-      "word": "Dog",
-      "meaning": "Con chó",
       "categoryId": 1,
       "isLearned": false,
       "topic": "Animal"
@@ -1062,6 +1055,45 @@
         }
       ],
       "id": 1759460975214
+    },
+    {
+      "date": "2025-10-07T04:40:57.796Z",
+      "category": "Action",
+      "score": 2,
+      "total": 5,
+      "answers": [
+        {
+          "questionId": 6,
+          "selected": "Chạy",
+          "correct": "Chạy",
+          "isCorrect": true
+        },
+        {
+          "questionId": 7,
+          "selected": "Chạy",
+          "correct": "Nhảy",
+          "isCorrect": false
+        },
+        {
+          "questionId": 8,
+          "selected": "Bơi",
+          "correct": "Bơi",
+          "isCorrect": true
+        },
+        {
+          "questionId": 9,
+          "selected": "Viết",
+          "correct": "Đọc",
+          "isCorrect": false
+        },
+        {
+          "questionId": 10,
+          "selected": "Đọc",
+          "correct": "Viết",
+          "isCorrect": false
+        }
+      ],
+      "id": 1759460975215
     }
   ]
 }
