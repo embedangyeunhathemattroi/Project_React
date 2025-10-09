@@ -11,7 +11,7 @@ const LandingPage: React.FC = () => {
   };
 
   return (
-    <div className="container text-center pt-5 mt-5">
+    <div className="container text-center pt-7 mt-7">
       <h1 className="fw-bold mb-3">Welcome to VocabApp</h1>
       <p className="lead text-muted">
         Learn and practice vocabulary with flashcards and quizzes
@@ -35,5 +35,5 @@ const LandingPage: React.FC = () => {
     </div>
   );
 };
-
+//LandingPage dành cho người chưa login → chỉ cần hiển thị giới thiệu app và 2 nút dẫn đến login/register.
 export default LandingPage;

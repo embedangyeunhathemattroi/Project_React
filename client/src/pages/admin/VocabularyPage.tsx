@@ -3,49 +3,62 @@ import { useDispatch, useSelector } from "react-redux";
 import Swal from "sweetalert2";
 import "bootstrap/dist/css/bootstrap.min.css";
 
-import {
-  addVocab,
-  deleteVocab,
-  fetchVocabs,
-  updateVocab,
-} from "../../stores/slices/vocabSLice";
-
+// Import các action CRUD từ redux slice
+import { addVocab, deleteVocab, fetchVocabs, updateVocab } from "../../stores/slices/vocabSLice";
 import { fetchCategories, addCategory } from "../../stores/slices/categoriesSlice";
 
+// Component phân trang và footer
 import PaginationAntd from "../../components/common/Pagination";
 import Footer from "../../components/common/Footer";
 
+// Kiểu TypeScript cho từ vựng và category
 import type { Vocab } from "../../types/vocab";
 import type { Category } from "../../types/category";
 
 const VocabularyPage: React.FC = () => {
   const dispatch = useDispatch<any>();
+
+  // Lấy danh sách từ vựng và trạng thái loading từ redux store
   const { vocabs = [], loading = false } = useSelector((state: any) => state.vocabs || {});
+  // Lấy danh sách category
   const { categories = [] } = useSelector((state: any) => state.categories || {});
 
+  // State quản lý modal thêm/sửa từ vựng
   const [modalOpen, setModalOpen] = useState(false);
+  // State lưu id từ vựng muốn xóa → hiển thị modal confirm delete
   const [deleteModal, setDeleteModal] = useState<null | number>(null);
+  // State lưu từ đang sửa, null nếu thêm mới
   const [editVocab, setEditVocab] = useState<Vocab | null>(null);
+
+  // State lưu input form thêm/sửa
   const [wordInput, setWordInput] = useState("");
   const [meaningInput, setMeaningInput] = useState("");
   const [categoryInput, setCategoryInput] = useState("");
+
+  // State cho search và lọc theo category
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
 
+  // State phân trang
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5; // số lượng từ mỗi trang
+
+  // Khi component mount, fetch dữ liệu từ redux
   useEffect(() => {
     dispatch(fetchVocabs());
     dispatch(fetchCategories());
   }, [dispatch]);
 
+  // Mở modal thêm/sửa
   const openModal = (vocab?: Vocab) => {
     if (vocab) {
+      // Nếu có vocab → đang sửa
       setEditVocab(vocab);
       setWordInput(vocab.word);
       setMeaningInput(vocab.meaning);
       setCategoryInput(vocab.topic);
     } else {
+      // Thêm mới
       setEditVocab(null);
       setWordInput("");
       setMeaningInput("");
@@ -54,121 +67,129 @@ const VocabularyPage: React.FC = () => {
     setModalOpen(true);
   };
 
+  // Đóng modal
   const closeModal = () => setModalOpen(false);
 
+  // Thêm hoặc cập nhật từ vựng
   const saveVocab = async () => {
-  const trimmedWord = wordInput.trim();
-  const trimmedMeaning = meaningInput.trim();
-  const trimmedCategory = categoryInput.trim();
+    const trimmedWord = wordInput.trim();
+    const trimmedMeaning = meaningInput.trim();
+    const trimmedCategory = categoryInput.trim();
 
-  // Kiểm tra rỗng
-  if (!trimmedWord || !trimmedMeaning || !trimmedCategory) {
-    Swal.fire({
-      icon: "warning",
-      title: "Oops...",
-      text: "Please fill all fields!",
-      toast: true,
-      position: "top-end",
-      showConfirmButton: false,
-      timer: 2000,
-      timerProgressBar: true,
-    });
-    return;
-  }
-
-  // Kiểm tra trùng word trong cùng category
-  const exists = vocabs.some(
-    (v: Vocab) =>
-      v.word.trim().toLowerCase() === trimmedWord.toLowerCase() &&
-      v.topic === trimmedCategory &&
-      (!editVocab || v.id !== editVocab.id)
-  );
-  if (exists) {
-    Swal.fire({
-      icon: "warning",
-      title: "Oops...",
-      text: `Word "${trimmedWord}" already exists in this category!`,
-      toast: true,
-      position: "top-end",
-      showConfirmButton: false,
-      timer: 2000,
-      timerProgressBar: true,
-    });
-    return;
-  }
-
-  try {
-    if (editVocab) {
-      await dispatch(
-        updateVocab({
-          ...editVocab,
-          word: trimmedWord,
-          meaning: trimmedMeaning,
-          topic: trimmedCategory,
-        })
-      ).unwrap();
-      Swal.fire("Updated!", `Vocabulary "${trimmedWord}" updated successfully!`, "success");
-    } else {
-      await dispatch(
-        addVocab({
-          word: trimmedWord,
-          meaning: trimmedMeaning,
-          topic: trimmedCategory,
-        })
-      ).unwrap();
-      Swal.fire("Added!", `Vocabulary "${trimmedWord}" added successfully!`, "success");
+    // Kiểm tra input rỗng
+    if (!trimmedWord || !trimmedMeaning || !trimmedCategory) {
+      Swal.fire({
+        icon: "warning",
+        title: "Oops...",
+        text: "Please fill all fields!",
+        toast: true,
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 2000,
+        timerProgressBar: true,
+      });
+      return;
     }
 
-    // Nếu category chưa tồn tại thì tự động thêm mới
-    const topicExists = categories.some((cat: Category) => cat.topic === trimmedCategory);
-    if (!topicExists) {
-      await dispatch(addCategory({ name: trimmedCategory, topic: trimmedCategory })).unwrap();
-      await dispatch(fetchCategories());
+    // Kiểm tra trùng từ trong cùng category
+    const exists = vocabs.some(
+      (v: Vocab) =>
+        v.word.trim().toLowerCase() === trimmedWord.toLowerCase() &&
+        v.topic === trimmedCategory &&
+        (!editVocab || v.id !== editVocab.id) // Nếu đang sửa bỏ qua từ đang sửa
+    );
+    if (exists) {
+      Swal.fire({
+        icon: "warning",
+        title: "Oops...",
+        text: `Word "${trimmedWord}" already exists in this category!`,
+        toast: true,
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 2000,
+        timerProgressBar: true,
+      });
+      return;
     }
 
-    await dispatch(fetchVocabs());
-    closeModal();
-    setEditVocab(null);
-    setWordInput("");
-    setMeaningInput("");
-    setCategoryInput("");
-  } catch (err: any) {
-    console.error(err);
-    Swal.fire("Error", err.message || "Operation failed", "error");
-  }
-};
+    try {
+      if (editVocab) {
+        // Update từ
+        await dispatch(
+          updateVocab({
+            ...editVocab,
+            word: trimmedWord,
+            meaning: trimmedMeaning,
+            topic: trimmedCategory,
+          })
+        ).unwrap();
+        Swal.fire("Updated!", `Vocabulary "${trimmedWord}" updated successfully!`, "success");
+      } else {
+        // Add từ mới
+        await dispatch(
+          addVocab({
+            word: trimmedWord,
+            meaning: trimmedMeaning,
+            topic: trimmedCategory,
+          })
+        ).unwrap();
+        Swal.fire("Added!", `Vocabulary "${trimmedWord}" added successfully!`, "success");
+      }
 
-// Xóa giống kiểu Cate: confirm modal riêng
-const handleDelete = async (id: number) => {
-  try {
-    await dispatch(deleteVocab(id)).unwrap();
-    await dispatch(fetchVocabs());
-    Swal.fire("Deleted!", "Vocabulary deleted successfully!", "success");
-    setDeleteModal(null);
-  } catch (err: any) {
-    console.error(err);
-    Swal.fire("Error", err.message || "Delete failed", "error");
-  }
-};
+      // Nếu category chưa tồn tại → tự động add
+      const topicExists = categories.some((cat: Category) => cat.topic === trimmedCategory);
+      if (!topicExists) {
+        await dispatch(addCategory({ name: trimmedCategory, topic: trimmedCategory })).unwrap();
+        await dispatch(fetchCategories());
+      }
 
+      // Refresh list
+      await dispatch(fetchVocabs());
+      closeModal();
+      setEditVocab(null);
+      setWordInput("");
+      setMeaningInput("");
+      setCategoryInput("");
+    } catch (err: any) {
+      console.error(err);
+      Swal.fire("Error", err.message || "Operation failed", "error");
+    }
+  };
 
+  // Xóa từ vựng
+  const handleDelete = async (id: number) => {
+    try {
+      await dispatch(deleteVocab(id)).unwrap();
+      await dispatch(fetchVocabs());
+      Swal.fire("Deleted!", "Vocabulary deleted successfully!", "success");
+      setDeleteModal(null);
+    } catch (err: any) {
+      console.error(err);
+      Swal.fire("Error", err.message || "Delete failed", "error");
+    }
+  };
+
+  // Mở modal confirm delete
   const confirmDelete = (id: number) => setDeleteModal(id);
 
-
+  // Filter vocabs theo search + category
   const filtered = vocabs.filter((v: Vocab) => {
     const matchWord = v.word.toLowerCase().includes(search.toLowerCase());
-    const matchCategory =
-      selectedCategory === "All Categories" || v.topic === selectedCategory;
+    const matchCategory = selectedCategory === "All Categories" || v.topic === selectedCategory;
     return matchWord && matchCategory;
   });
 
+  // Phân trang
   const totalPages = Math.ceil(filtered.length / itemsPerPage);
   const displayed = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  // Lấy danh sách category duy nhất từ vocabs
   const categoryList = Array.from(new Set(vocabs.map((v: Vocab) => v.topic)));
 
   return (
-    <div className="d-flex flex-column m-vh-1000 w-full h- full">
+    <div className="d-flex flex-column m-vh-1000 w-full h-full">
       <main className="flex-fill container mt-5 pt-3">
+        {/* Header + nút Add */}
         <div className="d-flex justify-content-between align-items-center mb-4">
           <h2 className="fw-bold fs-1 mb-0">Vocabulary Words</h2>
           <button
@@ -187,6 +208,7 @@ const handleDelete = async (id: number) => {
           </button>
         </div>
 
+        {/* Filter category */}
         <div className="mb-3">
           <div
             style={{
@@ -214,6 +236,7 @@ const handleDelete = async (id: number) => {
           </div>
         </div>
 
+        {/* Search box */}
         <div className="mb-2">
           <input
             type="text"
@@ -227,60 +250,61 @@ const handleDelete = async (id: number) => {
           />
         </div>
 
+        {/* Table */}
         {loading ? (
           <p>Loading...</p>
         ) : (
-   <table
-  className="table table-borderless"
-  style={{
-    border: "1px solid #e5e7eb", // tạo khung viền nhẹ cho table
-    borderRadius: "8px",
-    boxShadow: "0 4px 8px rgba(0,0,0,0.1)", // đổ bóng nhẹ
-    overflow: "hidden",
-  }}
->
-  <thead
-    style={{
-      backgroundColor: "#f3f4f6", // nền hơi sáng để tiêu đề nổi bật
-      boxShadow: "0 2px 5px rgba(0,0,0,0.1)",
-    }}
-  >
-    <tr>
-      <th style={{ fontWeight: 500, color: "#374151" }}>Word</th>
-      <th style={{ fontWeight: 500, color: "#374151" }}>Meaning</th>
-      <th style={{ fontWeight: 500, color: "#374151" }}>Category</th>
-      <th style={{ fontWeight: 500, color: "#374151" }}>Actions</th>
-    </tr>
-  </thead>
-  <tbody>
-    {displayed.map((v: Vocab) => (
-      <tr key={v.id}>
-        <td>{v.word}</td>
-        <td>{v.meaning}</td>
-        <td>{v.topic}</td>
-        <td>
-          <span
-            className="text-primary me-3"
-            style={{ cursor: "pointer" }}
-            onClick={() => openModal(v)}
+          <table
+            className="table table-borderless"
+            style={{
+              border: "1px solid #e5e7eb",
+              borderRadius: "8px",
+              boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
+              overflow: "hidden",
+            }}
           >
-            Edit
-          </span>
-          <span
-            className="text-danger"
-            style={{ cursor: "pointer" }}
-            onClick={() => confirmDelete(v.id)}
-          >
-            Delete
-          </span>
-        </td>
-      </tr>
-    ))}
-  </tbody>
-</table>
-
+            <thead
+              style={{
+                backgroundColor: "#f3f4f6",
+                boxShadow: "0 2px 5px rgba(0,0,0,0.1)",
+              }}
+            >
+              <tr>
+                <th style={{ fontWeight: 500, color: "#374151" }}>Word</th>
+                <th style={{ fontWeight: 500, color: "#374151" }}>Meaning</th>
+                <th style={{ fontWeight: 500, color: "#374151" }}>Category</th>
+                <th style={{ fontWeight: 500, color: "#374151" }}>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {displayed.map((v: Vocab) => (
+                <tr key={v.id}>
+                  <td>{v.word}</td>
+                  <td>{v.meaning}</td>
+                  <td>{v.topic}</td>
+                  <td>
+                    <span
+                      className="text-primary me-3"
+                      style={{ cursor: "pointer" }}
+                      onClick={() => openModal(v)}
+                    >
+                      Edit
+                    </span>
+                    <span
+                      className="text-danger"
+                      style={{ cursor: "pointer" }}
+                      onClick={() => confirmDelete(v.id)}
+                    >
+                      Delete
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         )}
 
+        {/* Pagination */}
         <div className="d-flex justify-content-end mt-3">
           <PaginationAntd
             currentPage={currentPage}
@@ -291,7 +315,7 @@ const handleDelete = async (id: number) => {
         </div>
       </main>
 
-      {/* Modal thêm/sửa */}
+      {/* Modal Add/Edit */}
       {modalOpen && (
         <div
           style={{
@@ -303,7 +327,7 @@ const handleDelete = async (id: number) => {
             justifyContent: "center",
             zIndex: 9999,
           }}
-          onClick={closeModal}
+          onClick={closeModal} // click ngoài modal → đóng
         >
           <div
             style={{
@@ -313,14 +337,14 @@ const handleDelete = async (id: number) => {
               maxWidth: "500px",
               overflow: "hidden",
             }}
-            onClick={(e) => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()} // tránh đóng khi click bên trong
           >
-            {/* Tiêu đề */}
+            {/* Tiêu đề modal */}
             <div style={{ padding: "16px 20px", borderBottom: "1px solid #e5e7eb" }}>
               <h5 className="mb-0">{editVocab ? "Edit Vocabulary" : "Add Vocabulary"}</h5>
             </div>
 
-            {/* Nội dung form */}
+            {/* Form input */}
             <div style={{ padding: "16px 20px", borderBottom: "1px solid #e5e7eb" }}>
               <label>Word</label>
               <input
@@ -345,16 +369,20 @@ const handleDelete = async (id: number) => {
               />
             </div>
 
-            {/* Nút */}
+            {/* Buttons */}
             <div className="d-flex justify-content-end gap-2" style={{ padding: "16px 20px" }}>
-              <button className="btn btn-secondary" onClick={closeModal}>Cancel</button>
-              <button className="btn btn-primary" onClick={saveVocab}>{editVocab ? "Save" : "Add"}</button>
+              <button className="btn btn-secondary" onClick={closeModal}>
+                Cancel
+              </button>
+              <button className="btn btn-primary" onClick={saveVocab}>
+                {editVocab ? "Save" : "Add"}
+              </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Modal xóa */}
+      {/* Modal Delete */}
       {deleteModal && (
         <div
           style={{
@@ -386,13 +414,18 @@ const handleDelete = async (id: number) => {
               <p className="mb-0">Are you sure you want to delete this vocabulary?</p>
             </div>
             <div className="d-flex justify-content-end gap-2" style={{ padding: "14px 20px" }}>
-              <button className="btn btn-secondary" onClick={() => setDeleteModal(null)}>Cancel</button>
-              <button className="btn btn-danger" onClick={() => handleDelete(deleteModal!)}>Delete</button>
+              <button className="btn btn-secondary" onClick={() => setDeleteModal(null)}>
+                Cancel
+              </button>
+              <button className="btn btn-danger" onClick={() => handleDelete(deleteModal!)}>
+                Delete
+              </button>
             </div>
           </div>
         </div>
       )}
 
+      {/* Footer */}
       <Footer />
     </div>
   );
