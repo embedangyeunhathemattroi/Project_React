@@ -84,4 +84,3 @@ const PaginationAntd: React.FC<PaginationProps> = ({
 );
 };
 export default PaginationAntd;
-// /Pagination là cách chia danh sách dài thành các trang nhỏ, gồm nút Previous/Next và số trang gần trang hiện tại, khi click sẽ gọi onPageChange cập nhật currentPage để re-render danh sách và highlight trang hiện tại; tổng số trang tính bằng Math.ceil(totalItems/pageSize), nút Previous/Next disable khi ở đầu/cuố

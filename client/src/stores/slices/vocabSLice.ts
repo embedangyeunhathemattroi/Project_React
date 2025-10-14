@@ -59,7 +59,7 @@ export const deleteVocab = createAsyncThunk("vocabs/delete",async (id: number, {
 const vocabSlice = createSlice({
   name: "vocabs",           // tên slice
   initialState,             // state mặc định
-  reducers: {},             // reducer thuần, ở đây không dùng
+  reducers: {},             
   extraReducers: (builder) => {
     builder
       .addCase(fetchVocabs.pending, (state) => { // đang load API
@@ -80,11 +80,13 @@ const vocabSlice = createSlice({
         state.vocabs.push(action.payload); // thêm vocab mới vào state
       })
 
-      // --- xử lý cập nhật vocab ---
-      .addCase(updateVocab.fulfilled, (state, action) => {
-        const index = state.vocabs.findIndex(v => v.id === action.payload.id);
-        if (index !== -1) state.vocabs[index] = action.payload; // update vocab theo id
-      })
+     .addCase(updateVocab.fulfilled, (state, action) => {
+  //  Tìm vị trí (index) của từ vựng trong mảng `state.vocabs` có cùng ID với từ được cập nhật
+  const index = state.vocabs.findIndex(v => v.id === action.payload.id);
+  //  Nếu tìm thấy (index khác -1) → thay thế phần tử cũ bằng dữ liệu mới từ `action.payload`→ Giúp cập nhật đúng từ vựng vừa được sửa trong Redux store
+  if (index !== -1) state.vocabs[index] = action.payload;
+})
+
 
       // --- xử lý xóa vocab ---
       .addCase(deleteVocab.fulfilled, (state, action) => {

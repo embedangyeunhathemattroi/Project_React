@@ -1,7 +1,6 @@
 import axiosClient from "./axiosClient";
 import type { Category } from "../types/category"; 
 const API_URL = "/categories"; 
-
 // Lấy danh sách category
 export const fetchCategoriesApi = async (): Promise<Category[]> => {
   const res = await axiosClient.get<Category[]>(API_URL); // gọi GET /categories trả về mảng category

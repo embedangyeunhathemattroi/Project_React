@@ -1,96 +1,127 @@
-import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { Select, Input, Row, Col } from "antd";
-import Swal from "sweetalert2";
-import "bootstrap/dist/css/bootstrap.min.css";
-import "antd/dist/reset.css";
-import { fetchCategories, addCategory, updateCategory, deleteCategory } from "../../stores/slices/categoriesSlice";
-import PaginationAntd from "../../components/common/Pagination";
-import Footer from "../../components/common/Footer";
-import type { Category } from "../../types/category";
+import React, { useEffect, useState, useMemo } from "react"; 
+import { useDispatch, useSelector } from "react-redux"; // Dùng để lấy và gửi dữ liệu Redux
+import { Select, Input, Row, Col } from "antd"; 
+import Swal from "sweetalert2"; 
+import "bootstrap/dist/css/bootstrap.min.css"; 
+import "antd/dist/reset.css"; 
+import {fetchCategories, addCategory, updateCategory, deleteCategory, } from "../../stores/slices/categoriesSlice";
+import PaginationAntd from "../../components/common/Pagination"; 
+import Footer from "../../components/common/Footer"; 
+import type { Category } from "../../types/category"; 
 
+// ========================== COMPONENT CHÍNH ==========================
 const Cate: React.FC = () => {
-  // === KHAI BÁO BIẾN TRẠNG THÁI & KẾT NỐI REDUX ===
-  const dispatch = useDispatch<any>();
-  // Lấy danh sách categories từ store Redux
-  const { categories = [] } = useSelector((state: any) => state.categories || {});
-  // Các state quản lý modal, form và phân trang
-  const [modalOpen, setModalOpen] = useState(false); // mở/đóng modal thêm/sửa
-  const [deleteModal, setDeleteModal] = useState<null | number>(null); // modal xác nhận xóa
-  const [editCategory, setEditCategory] = useState<Category | null>(null); // lưu danh mục đang sửa
-  const [nameInput, setNameInput] = useState(""); // input name
-  const [descriptionInput, setDescriptionInput] = useState(""); // input description
-  const [search, setSearch] = useState(""); // từ khóa tìm kiếm
-  const [filterName, setFilterName] = useState("All"); // lọc theo tên
-  const [currentPage, setCurrentPage] = useState(1); // trang hiện tại
-  const [formError, setFormError] = useState<string>(""); // lỗi trong form
+  const dispatch = useDispatch<any>(); // Dùng để gọi các action Redux
+  const { categories = [] } = useSelector(
+    (state: any) => state.categories || {}
+  ); // Lấy danh sách categories từ store Redux
 
-  const itemsPerPage = 5; // số mục hiển thị mỗi trang
+  // -------------------- STATE --------------------
+  const [modalOpen, setModalOpen] = useState(false); // Trạng thái mở modal thêm/sửa
+  const [deleteModal, setDeleteModal] = useState<null | number>(null); // ID của category cần xóa
+  const [editCategory, setEditCategory] = useState<Category | null>(null); // Lưu category đang được chỉnh sửa
+  const [nameInput, setNameInput] = useState(""); // Input tên category
+  const [descriptionInput, setDescriptionInput] = useState(""); // Input mô tả
+  const [search, setSearch] = useState(""); // Input tìm kiếm
+  const [debouncedSearch, setDebouncedSearch] = useState(search); // Giá trị tìm kiếm có debounce (trì hoãn)
+  const [filterName, setFilterName] = useState("All"); // Bộ lọc tên category
+  const [currentPage, setCurrentPage] = useState(1); // Trang hiện tại của phân trang
+  const [formError, setFormError] = useState<string>(""); // Thông báo lỗi form (nếu có)
+  const [lastAddedId, setLastAddedId] = useState<number | null>(null); // ID của category vừa mới thêm
+  const itemsPerPage = 5; // Số lượng category mỗi trang
 
-  // === HÀM SINH TOPIC TỪ NAME (slug dạng URL) ===
-  const generateTopic = (name: string) =>
-    name.toLowerCase().trim().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+  // -------------------- HÀM TẠO TOPIC --------------------
+  // Chuyển tên category thành topic (slug) thân thiện URL, ví dụ: "My Cat" -> "my-cat"
+  const generateTopic = (name: string) =>name.toLowerCase() .trim()  .replace(/\s+/g, "-") .replace(/[^a-z0-9-]/g, "");
 
-  // === GỌI DỮ LIỆU CATEGORY TỪ REDUX STORE ===
+  // -------------------- HÀM LOAD CATEGORY TỪ API --------------------
   const loadCategories = async () => {
     try {
-      await dispatch(fetchCategories()).unwrap();
+      await dispatch(fetchCategories()).unwrap(); // Gọi action Redux để lấy dữ liệu
     } catch (err) {
       console.error(err);
     }
   };
 
-  // Khi component mount → tự động tải danh sách categories
+  // Khi component vừa mount -> tự động gọi API lấy danh sách category
   useEffect(() => {
     loadCategories();
   }, []);
 
-  // === MỞ MODAL (thêm mới hoặc chỉnh sửa) ===
+  // -------------------- DEBOUNCE SEARCH --------------------
+  // Cập nhật debouncedSearch sau 100ms khi người dùng ngừng gõ
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 100);
+    return () => clearTimeout(t); // Clear timeout khi user tiếp tục gõ
+  }, [search]);
+
+//  useEffect được gọi mỗi khi 'categories' hoặc 'lastAddedId' thay đổi
+useEffect(() => {
+  //  Kiểm tra nếu tồn tại 'lastAddedId' (tức là ID của danh mục vừa được thêm) nhưng ID đó KHÔNG còn nằm trong mảng 'categories' hiện tại
+  // → nghĩa là danh mục này có thể đã bị xóa.
+  if (
+    lastAddedId !== null && // chỉ kiểm tra khi lastAddedId có giá trị
+    !categories.some((c: Category) => c.id === lastAddedId) // tìm xem có danh mục nào có id = lastAddedId hay không
+  ) {
+    //  Nếu danh mục vừa thêm đã bị xóa, đặt lại lastAddedId = null
+    // để tránh giữ trạng thái không hợp lệ (tránh hiển thị sai)
+    setLastAddedId(null);
+  }
+}, [categories, lastAddedId]); 
+
+
+
+  // -------------------- HÀM MỞ/CLOSE MODAL --------------------
   const openModal = (cat?: Category) => {
     if (cat) {
-      // Nếu có category → đang ở chế độ chỉnh sửa
+      // Nếu có cat -> đang chỉnh sửa
       setEditCategory(cat);
       setNameInput(cat.name);
       setDescriptionInput(cat.description);
     } else {
-      // Nếu không → thêm mới
+      // Nếu không có cat -> đang thêm mới
       setEditCategory(null);
       setNameInput("");
       setDescriptionInput("");
     }
-    setFormError("");
-    setModalOpen(true);
+    setFormError(""); // Reset lỗi
+    setModalOpen(true); // Mở modal
   };
-  const closeModal = () => setModalOpen(false);
-  // === HÀM LƯU (THÊM / SỬA DANH MỤC) ===
-  const saveCategory = async () => {
-    //  B1: Cắt bỏ khoảng trắng đầu/cuối trong input
-    const trimmedName = nameInput.trim();
-    const trimmedDescription = descriptionInput.trim();
+  const closeModal = () => setModalOpen(false); // Đóng modal
 
-    //  B2: Kiểm tra nếu người dùng để trống Name hoặc Description
+  // -------------------- HÀM LƯU CATEGORY (THÊM HOẶC CẬP NHẬT) --------------------
+  const saveCategory = async () => {
+    // Viết hoa chữ cái đầu tên
+    const capitalizeFirst = (text: string) =>
+      text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+
+    // Chuẩn hóa dữ liệu nhập
+    const trimmedName = capitalizeFirst(nameInput.trim());
+    const trimmedDescription = descriptionInput.trim();
+    // Kiểm tra nhập trống
     if (!trimmedName || !trimmedDescription) {
       Swal.fire({
         icon: "warning",
         title: "Oops...",
-        text: "Please fill all fields!", 
+        text: "Please fill all fields!",
         toast: true,
         position: "top-end",
         showConfirmButton: false,
         timer: 2000,
         timerProgressBar: true,
       });
-      return; //  Dừng lại, không lưu
+      return;
     }
 
-    //  B3: Kiểm tra xem tên danh mục có bị trùng không
-    const nameExists = categories.some(
-      (cat: Category) =>
-        cat.name.trim().toLowerCase() === trimmedName.toLowerCase() && // So sánh không phân biệt hoa thường
-        (!editCategory || cat.id !== editCategory.id) // Nếu đang sửa, bỏ qua chính danh mục đó
-    );
-
-    // Nếu trùng tên → cảnh báo và dừng lại
+    // Kiểm tra trùng tên danh mục (trimmedName) đã tồn tại chưa
+// - So sánh không phân biệt hoa thường
+// - Bỏ qua chính danh mục đang chỉnh sửa (nếu có)
+const nameExists = categories.some( (cat: Category) =>
+    cat.name.trim().toLowerCase() === trimmedName.toLowerCase() &&
+    (!editCategory || cat.id !== editCategory.id)
+);
     if (nameExists) {
       Swal.fire({
         icon: "warning",
@@ -105,30 +136,29 @@ const Cate: React.FC = () => {
       return;
     }
 
-    // B4: Sinh ra một "topic" slug từ tên danh mục (ví dụ: "Animal World" → "animal-world")
+    // Tạo topic thân thiện với URL
     const topic = generateTopic(trimmedName);
 
     try {
-      //  B5: Nếu đang ở chế độ "Edit" (tức là có editCategory)
       if (editCategory) {
+        // Nếu đang chỉnh sửa -> gọi update
         await dispatch(
           updateCategory({
-            ...editCategory, // giữ lại id và các thông tin cũ
-            name: trimmedName, // cập nhật name mới
-            description: trimmedDescription, // cập nhật description mới
-            topic, // cập nhật topic mới
+            ...editCategory,
+            name: trimmedName,
+            description: trimmedDescription,
+            topic,
           })
-        ).unwrap(); // unwrap() để bắt lỗi dễ dàng hơn
+        ).unwrap();
 
-        // Gọi lại hàm loadCategories() để refresh danh sách hiển thị
-        await loadCategories();
-
-        // Hiển thị thông báo thành công
-        Swal.fire("Updated!", `Category "${trimmedName}" updated successfully!`, "success");
-      } 
-      //  B6: Nếu không có editCategory → đây là thao tác "Add New"
-      else {
-        await dispatch(
+        Swal.fire(
+          "Updated!",
+          `Category "${trimmedName}" updated successfully!`,
+          "success"
+        );
+      } else {
+        // Nếu thêm mới
+        const newCat: Category = await dispatch(
           addCategory({
             name: trimmedName,
             description: trimmedDescription,
@@ -136,252 +166,312 @@ const Cate: React.FC = () => {
           })
         ).unwrap();
 
-        await loadCategories(); // reload danh sách sau khi thêm
-        Swal.fire("Added!", `Category "${trimmedName}" added successfully!`, "success");
+        // Lưu lại id của category vừa thêm
+        if (newCat && typeof newCat.id !== "undefined") {
+          setLastAddedId(newCat.id);
+        }
+
+        // Cập nhật lại số trang sau khi thêm
+        const totalPages = Math.ceil((categories.length + 1) / itemsPerPage);
+        setCurrentPage(totalPages);
+
+        Swal.fire(
+          "Added!",
+          `Category "${trimmedName}" added successfully!`,
+          "success"
+        );
       }
 
-      //  B7: Sau khi lưu thành công → reset form về trạng thái mặc định
-      closeModal(); // đóng modal
-      setEditCategory(null); // không còn đang chỉnh sửa
-      setNameInput(""); // xóa input name
-      setDescriptionInput(""); // xóa input description
+      // Sau khi lưu xong -> reset form
+      closeModal();
+      setEditCategory(null);
+      setNameInput("");
+      setDescriptionInput("");
     } catch (err: any) {
-      //  B8: Nếu có lỗi trong quá trình gọi API hoặc redux
       console.error(err);
       Swal.fire("Error", err.message || "Operation failed", "error");
     }
   };
 
-  // === XÓA DANH MỤC ===
-
-  //  Khi nhấn nút Delete → chỉ mở modal xác nhận xóa
-  const confirmDelete = (id: number) => setDeleteModal(id);
-
-  //  Khi người dùng xác nhận xóa trong modal
+  // -------------------- XÓA CATEGORY --------------------
+  const confirmDelete = (id: number) => setDeleteModal(id); // Hiển thị modal xác nhận xóa
   const handleDelete = async (id: number) => {
     try {
-      await dispatch(deleteCategory(id)).unwrap(); // Gọi redux action để xóa danh mục theo id
-      await loadCategories(); // Tải lại danh sách danh mục sau khi xóa thành công
+      await dispatch(deleteCategory(id)).unwrap(); // Gọi Redux để xóa category
+      await loadCategories(); // Tải lại danh sách
+      if (lastAddedId === id) setLastAddedId(null); // Nếu xóa item vừa thêm -> clear
+      // Kiểm tra trang hiện tại, nếu vượt tổng trang thì lùi 1 trang
+      const totalAfterDelete = categories.length - 1;
+      const totalPagesAfter = Math.max(
+        1,
+        Math.ceil(totalAfterDelete / itemsPerPage)
+      );
+      if (currentPage > totalPagesAfter) setCurrentPage(totalPagesAfter);
+
       Swal.fire("Deleted!", "Category deleted successfully!", "success");
-      setDeleteModal(null); // Đóng modal xác nhận
+      setDeleteModal(null);
     } catch (err: any) {
-      // Nếu xóa thất bại (VD: lỗi server hoặc không tìm thấy id)
       console.error(err);
       Swal.fire("Error", err.message || "Delete failed", "error");
     }
   };
 
+  // -------------------- LỌC + TÌM KIẾM + SẮP XẾP --------------------
+  const filtered = useMemo(() => {
+    // Chuẩn hóa chuỗi để tìm kiếm không phân biệt hoa thường hoặc dấu tiếng Việt
+    const normalized = (s: string) =>
+      s.toLowerCase() .normalize("NFD") .replace(/[\u0300-\u036f]/g, "");
 
-  // === LỌC & PHÂN TRANG ===
-const filtered = categories.filter((cat: Category) => {
-  // ✅ Kiểm tra xem tên danh mục có chứa từ khóa tìm kiếm không (không phân biệt hoa/thường)
-  const matchesSearch = cat.name.toLowerCase().includes(search.toLowerCase());
+    // Lọc dữ liệu
+    const base = categories.filter((cat: Category) => {
+      const searchTerm = normalized(debouncedSearch);
+      // Cho phép tìm theo cả name và description
+      const matchesSearch =
+        normalized(cat.name).includes(searchTerm) ||
+        normalized(cat.description).includes(searchTerm);
 
-  // ✅ Kiểm tra xem danh mục có khớp với filterName (tên đang được chọn trong dropdown) hay không
-  const matchesName = filterName === "All" || cat.name === filterName;
+      // Nếu filterName = "All" thì lấy tất cả
+      const matchesName = filterName === "All" || cat.name === filterName;
 
-  // ✅ Chỉ trả về những danh mục thỏa cả 2 điều kiện (lọc & tìm kiếm)
-  return matchesSearch && matchesName;
-});
+      return matchesSearch && matchesName;
+    });
 
-// ✅ Sau khi lọc xong → cắt dữ liệu để hiển thị đúng số lượng trên từng trang
+    // Sắp xếp kết quả
+    base.sort((a: Category, b: Category) => {
+      // Nếu có lastAddedId -> category đó được đưa xuống cuối danh sách
+      if (lastAddedId !== null) {
+        if (a.id === lastAddedId && b.id !== lastAddedId) return 1;
+        if (b.id === lastAddedId && a.id !== lastAddedId) return -1;
+      }
+
+      // Còn lại thì sắp xếp theo tên A-Z
+      return a.name.localeCompare(b.name, "en", { sensitivity: "base" });
+    });
+
+    return base; // Trả về danh sách đã lọc + sắp xếp
+  }, [categories, debouncedSearch, filterName, lastAddedId]);
+
+  // -------------------- TÍNH TOÁN PHÂN TRANG --------------------
+// loc để chỉ lấy các phần tử thuộc trang hiện tại
+// - (currentPage - 1) * itemsPerPage → vị trí bắt đầu (index đầu của trang)
+// - currentPage * itemsPerPage → vị trí kết thúc (index cuối của trang)
+// → Giúp hiển thị đúng số lượng item theo từng trang (phân trang)
 const displayed = filtered.slice(
-  (currentPage - 1) * itemsPerPage, // Vị trí bắt đầu
-  currentPage * itemsPerPage        // Vị trí kết thúc
+  (currentPage - 1) * itemsPerPage,
+  currentPage * itemsPerPage
 );
 
-// ✅ Tạo danh sách option cho Select filter (dropdown chọn theo tên danh mục)
-const nameOptions = [
-  { value: "All", label: "All Names" }, // Lựa chọn hiển thị tất cả
-  ...[...new Set(categories.map((cat: Category) => cat.name))] // Loại bỏ trùng tên
-    .map((name) => ({
-      value: name,
-      label: name,
-    })),
-];
 
-// === GIAO DIỆN CHÍNH ===
-return (
-  <div className="d-flex flex-column min-vh-100 w-full">
-    <main className="flex-fill" style={{ padding: "40px" }}>
-      <div className="d-flex justify-content-between align-items-center pb-4 pt-4 flex-wrap">
-        <h2 style={{ color: "#212529", fontWeight: 400 }}>Vocabulary Categories</h2>
-        {/* Nút "Add New Category" để mở modal thêm danh mục */}
-        <button
-          style={{
-            backgroundColor: "#22C55E",
-            color: "white",
-            padding: "14px 28px",
-            fontSize: "1.1rem",
-            minWidth: "180px",
-            border: "none",
-            borderRadius: "10px",
-            boxShadow: "0 4px 10px rgba(0,0,0,0.2)",
-            cursor: "pointer",
-          }}
-          onClick={() => openModal()} // 👉 Khi click → mở modal thêm mới
-          onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#16A34A")} // Hiệu ứng hover
-          onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#22C55E")}
-        >
-          Add New Category
-        </button>
-      </div>
+  // -------------------- TẠO DANH SÁCH OPTION LỌC THEO TÊN --------------------
+  const nameOptions = [
+    { value: "All", label: "All Names" }, // Mặc định: All
+    ...[...new Set(categories.map((cat: Category) => cat.name))].map(
+      (name) => ({
+        value: name,
+        label: name,
+      })
+    ),
+  ];
+ // Log ra để kiểm tra các option lọc
+  console.log(nameOptions);
 
-      {/* ----- PHẦN LỌC + TÌM KIẾM ----- */}
-      <Row gutter={[0, 16]} className="mb-4">
-        {/* Dropdown chọn danh mục để lọc theo tên */}
-        <Col span={24} className="mb-3">
-          <Select
-            value={filterName}
-            onChange={(value) => {
-              setFilterName(value); // Cập nhật giá trị filter
-              setCurrentPage(1);    // Trả về trang đầu sau khi lọc
+  return (
+    <div className="d-flex flex-column min-vh-100 w-full">
+      <main className="flex-fill" style={{ padding: "40px" }}>
+        <div className="d-flex justify-content-between align-items-center pb-4 pt-4 flex-wrap">
+          <h2 style={{ color: "#212529", fontWeight: 40000 }}>
+            <strong>Vocabulary Categories</strong>
+          </h2>
+          <button
+            style={{
+              backgroundColor: "#22C55E",
+              color: "white",
+              padding: "14px 28px",
+              fontSize: "1.1rem",
+              minWidth: "180px",
+              border: "none",
+              borderRadius: "10px",
+              boxShadow: "0 4px 10px rgba(0,0,0,0.2)",
+              cursor: "pointer",
             }}
-            style={{ width: "100%", height: "56px", borderRadius: "12px" }}
-            size="large"
-            options={nameOptions} // Truyền danh sách option từ trên
-          />
-        </Col>
+            onClick={() => openModal()}
+            onMouseEnter={(e) =>
+              (e.currentTarget.style.backgroundColor = "#16A34A")
+            }
+            onMouseLeave={(e) =>
+              (e.currentTarget.style.backgroundColor = "#22C55E")
+            }
+          >
+            Add New Category
+          </button>
+        </div>
 
-        {/* Ô input tìm kiếm theo tên danh mục */}
-        <Col span={24}>
-          <Input
-            placeholder="Search categories..."
-            allowClear
-            size="large"
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value); // Cập nhật chuỗi tìm kiếm
-              setCurrentPage(1);         // Khi tìm kiếm → reset về trang 1
-            }}
-            style={{ height: "56px", borderRadius: "12px" }}
-          />
-        </Col>
-      </Row>
+        {/* Filter + Search */}
+        <Row gutter={[0, 16]} className="mb-4">
+          <Col span={24} className="mb-3">
+            <Select
+              value={filterName}
+              onChange={(value) => {
+                setFilterName(value);
+                setCurrentPage(1);
+              }}
+              style={{ width: "100%", height: "56px", borderRadius: "12px" }}
+              size="large"
+              options={nameOptions}
+            />
+          </Col>
 
-      {/* ----- BẢNG HIỂN THỊ DANH MỤC ----- */}
-      <div
-        style={{
-          backgroundColor: "#fff",
-          borderRadius: "12px",
-          boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-          padding: "20px",
-          overflowX: "auto",
-        }}
-      >
-        <table className="table table-borderless table-hover mb-0" style={{ width: "100%" }}>
-          <thead>
-            <tr>
-              <th style={{ color: "#6B7280" }}>NAME</th>
-              <th style={{ color: "#6B7280" }}>DESCRIPTION</th>
-              <th style={{ color: "#6B7280" }}>ACTIONS</th>
-            </tr>
-          </thead>
-          <tbody>
-            {/* ✅ Lặp qua danh sách hiển thị (sau khi lọc + phân trang) */}
-            {displayed.map((cat: Category) => (
-              <tr key={cat.id}>
-                <td>{cat.name}</td>
-                <td>{cat.description}</td>
-                <td>
-                  {/* Nút Edit → mở modal chỉnh sửa danh mục */}
-                  <span
-                    style={{ color: "blue", cursor: "pointer" }}
-                    onClick={() => openModal(cat)}
-                  >
-                    Edit
-                  </span>{" "}
-                  |{" "}
-                  {/* Nút Delete → mở modal xác nhận xóa */}
-                  <span
-                    style={{ color: "red", cursor: "pointer" }}
-                    onClick={() => confirmDelete(cat.id)}
-                  >
-                    Delete
-                  </span>
-                </td>
-              </tr>
-            ))}
+          <Col span={24}>
+            <Input
+              placeholder="Search categories..."
+              allowClear
+              size="large"
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setCurrentPage(1); // reset page khi user bắt đầu tìm (UX tốt)
+              }}
+              style={{ height: "56px", borderRadius: "12px" }}
+            />
+            {/* Ghi chú: kết quả thực tế sẽ filter sau 1s (debounce) */}
+          </Col>
+        </Row>
 
-            {/*  Nếu không có danh mục nào khớp → hiển thị thông báo */}
-            {displayed.length === 0 && (
-              <tr>
-                <td colSpan={3} className="text-center text-muted">
-                  No categories found.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      {/* ----- PHÂN TRANG ----- */}
-      <div className="d-flex justify-content-center mt-4">
-        <PaginationAntd
-          currentPage={currentPage}       // Trang hiện tại
-          totalItems={filtered.length}    // Tổng số danh mục sau khi lọc
-          pageSize={itemsPerPage}         // Số danh mục / 1 trang
-          onPageChange={(page) => setCurrentPage(page)} // Hàm chuyển trang
-        />
-      </div>
-
-      {/* ----- MODAL THÊM / SỬA DANH MỤC ----- */}
-      {modalOpen && (
+        {/* Table */}
         <div
           style={{
-            position: "fixed",
-            inset: 0,
-            backgroundColor: "rgba(0,0,0,0.4)",
-            display: "flex",
-            alignItems: "flex-start",
-            justifyContent: "center",
-            paddingTop: "60px",
-            zIndex: 9999,
+            backgroundColor: "#fff",
+            borderRadius: "12px",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+            padding: "20px",
+            overflowX: "auto",
           }}
-          onClick={closeModal} //  Click ra ngoài → đóng modal
         >
+          <table
+            className="table table-borderless table-hover mb-0"
+            style={{ width: "100%", borderSpacing: "0 12px" }}
+          >
+            <thead>
+              <tr>
+                <th style={{ color: "#6B7280" }}>NAME</th>
+                <th style={{ color: "#6B7280" }}>DESCRIPTION</th>
+                <th style={{ color: "#6B7280" }}>ACTIONS</th>
+              </tr>
+            </thead>
+            <tbody>
+              {displayed.map((cat: Category) => (
+                <tr key={cat.id} style={{ height: "60px" }}>
+                  <td>{cat.name}</td>
+                  <td>{cat.description}</td>
+                  <td>
+                    <div style={{ display: "flex", gap: "16px" }}>
+                      <span
+                        style={{
+                          color: "blue",
+                          cursor: "pointer",
+                          fontWeight: 500,
+                        }}
+                        onClick={() => openModal(cat)}
+                      >
+                        Edit
+                      </span>
+                      <span
+                        style={{
+                          color: "red",
+                          cursor: "pointer",
+                          fontWeight: 500,
+                        }}
+                        onClick={() => confirmDelete(cat.id)}
+                      >
+                        Delete
+                      </span>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+
+              {displayed.length === 0 && (
+                <tr>
+                  <td colSpan={3} className="text-center text-muted">
+                    No categories found.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination */}
+        <div className="d-flex justify-content-center mt-4">
+          <PaginationAntd
+            currentPage={currentPage}
+            totalItems={filtered.length}
+            pageSize={itemsPerPage}
+            onPageChange={(page) => setCurrentPage(page)}
+          />
+        </div>
+
+        {/* Modal Add/Edit */}
+        {modalOpen && (
           <div
             style={{
-              backgroundColor: "#fff",
-              borderRadius: "12px",
-              width: "100%",
-              maxWidth: "650px",
-              maxHeight: "80vh",
-              overflowY: "auto",
-              padding: "0",
+              position: "fixed",
+              inset: 0,
+              backgroundColor: "rgba(0,0,0,0.4)",
+              display: "flex",
+              alignItems: "flex-start",
+              justifyContent: "center",
+              paddingTop: "60px",
+              zIndex: 9999,
             }}
-            onClick={(e) => e.stopPropagation()} //  Ngăn click bên trong modal bị đóng ngoài ý muốn
+            onClick={closeModal}
           >
-            {/* Header modal */}
             <div
               style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                padding: "16px 24px",
-                borderBottom: "1px solid #e5e7eb",
+                backgroundColor: "#fff",
+                borderRadius: "12px",
+                width: "100%",
+                maxWidth: "650px",
+                maxHeight: "80vh",
+                overflowY: "auto",
+                padding: "0",
               }}
+              onClick={(e) => e.stopPropagation()}
             >
-              {/* Nếu có editCategory → hiển thị "Edit", ngược lại là "Add" */}
-              <h5 className="mb-0">{editCategory ? "Edit Category" : "Add Category"}</h5>
-              <button
-                onClick={closeModal} // Đóng modal khi bấm nút "×"
+              <div
                 style={{
-                  background: "transparent",
-                  border: "none",
-                  fontSize: "1.2rem",
-                  cursor: "pointer",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: "16px 24px",
+                  borderBottom: "1px solid #e5e7eb",
                 }}
               >
-                ×
-              </button>
-            </div>
+                <h5 className="mb-0">
+                  {editCategory ? "Edit Category" : "Add Category"}
+                </h5>
+                <button
+                  onClick={closeModal}
+                  style={{
+                    background: "transparent",
+                    border: "none",
+                    fontSize: "1.2rem",
+                    cursor: "pointer",
+                  }}
+                >
+                  ×
+                </button>
+              </div>
 
-
-              {/* Body modal */}
               <div style={{ padding: "20px 30px" }}>
                 {formError && (
-                  <div style={{ color: "red", marginBottom: "10px", fontWeight: 500 }}>
+                  <div
+                    style={{
+                      color: "red",
+                      marginBottom: "10px",
+                      fontWeight: 500,
+                    }}
+                  >
                     {formError}
                   </div>
                 )}
@@ -399,8 +489,8 @@ return (
                 />
 
                 <label style={{ fontWeight: 500 }}>Description</label>
-                <input
-                  type="text"
+                <textarea
+                  
                   className="form-control"
                   value={descriptionInput}
                   onChange={(e) => {
@@ -411,7 +501,6 @@ return (
                 />
               </div>
 
-              {/* Footer modal */}
               <div
                 className="d-flex justify-content-end gap-3"
                 style={{ padding: "16px 30px", borderTop: "1px solid #e5e7eb" }}
@@ -427,7 +516,7 @@ return (
           </div>
         )}
 
-        {/* ----- MODAL XÓA DANH MỤC ----- */}
+        {/* Modal Delete */}
         {deleteModal && (
           <div
             style={{
@@ -454,7 +543,6 @@ return (
               }}
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Header */}
               <div
                 style={{
                   display: "flex",
@@ -478,20 +566,26 @@ return (
                 </button>
               </div>
 
-              {/* Body */}
               <div style={{ padding: "16px 24px" }}>
-                <p className="mb-0">Are you sure you want to delete this category?</p>
+                <p className="mb-0">
+                  Are you sure you want to delete this category?
+                </p>
               </div>
 
-              {/* Footer */}
               <div
                 className="d-flex justify-content-end gap-3"
                 style={{ padding: "14px 24px", borderTop: "1px solid #e5e7eb" }}
               >
-                <button className="btn btn-secondary" onClick={() => setDeleteModal(null)}>
+                <button
+                  className="btn btn-secondary"
+                  onClick={() => setDeleteModal(null)}
+                >
                   Cancel
                 </button>
-                <button className="btn btn-danger" onClick={() => handleDelete(deleteModal!)}>
+                <button
+                  className="btn btn-danger"
+                  onClick={() => handleDelete(deleteModal!)}
+                >
                   Delete
                 </button>
               </div>
@@ -505,6 +599,7 @@ return (
 };
 
 export default Cate;
+
 //Quản lý state
 
 // useState để lưu các trạng thái:
@@ -564,3 +659,5 @@ export default Cate;
 // Sau khi lọc → cắt danh sách theo trang hiện tại (currentPage) và số mục mỗi trang (itemsPerPage)
 
 // PaginationAntd thay đổi currentPage → cập nhật hiển thị.
+
+//fix cho nó rộng ra về chiều dài trong bảng và edit và delete thì mất dấu gạch

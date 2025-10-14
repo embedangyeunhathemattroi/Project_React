@@ -2,14 +2,12 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 import {addCategoryApi,deleteCategoryApi,fetchCategoriesApi,updateCategoryApi,} from "../../apis/categoryApi";
 import type { Category } from "../../types/category";
-
-
 //  Định nghĩa kiểu state lưu trong Redux
 interface CategoriesState {
   categories: Category[];   // Danh sách các danh mục hiện có
   loading: boolean;         
   error: string | null;     
-  currentFilter: string;    // Bộ lọc hiện tại ("All", "Animals", "Plants", v.v.)
+  currentFilter: string;    // Bộ lọc hiện tại
 }
 
 //  State khởi tạo ban đầu
@@ -21,10 +19,8 @@ const initialState: CategoriesState = {
 };
 
 //  Thunk 1: Lấy toàn bộ danh mục từ API
-// createAsyncThunk tự động tạo ra 3 action: pending / fulfilled / rejected
 export const fetchCategories = createAsyncThunk("categories/fetch", async (_, { rejectWithValue }) => {
-    try {
-      // Gọi API lấy danh sách category
+    try {// Gọi API lấy danh sách category
       return await fetchCategoriesApi();
     } catch (err: any) {
       return rejectWithValue(err.message || "Fetch failed");
@@ -32,6 +28,37 @@ export const fetchCategories = createAsyncThunk("categories/fetch", async (_, { 
   }
 );
 
+// Thunk 3: Thêm danh mục mới
+export const addCategory = createAsyncThunk("categories/add", async (category: { name: string; topic: string }, { rejectWithValue }) => {
+    try {
+      // Gọi API thêm category
+      return await addCategoryApi(category);
+    } catch (err: any) {
+      return rejectWithValue(err.message || "Add failed");
+    }
+  }
+);
+
+//  Thunk 4: Cập nhật danh mục
+export const updateCategory = createAsyncThunk( "categories/update", async (category: Category, { rejectWithValue }) => {
+    try {
+      return await updateCategoryApi(category);
+    } catch (err: any) {
+      return rejectWithValue(err.message || "Update failed");
+    }
+  }
+);
+
+//  Thunk 5: Xóa danh mục
+export const deleteCategory = createAsyncThunk( "categories/delete",async (id: number, { rejectWithValue }) => {
+    try {
+      await deleteCategoryApi(id);
+      return id; // Trả về id để reducer biết danh mục nào cần xóa khỏi state
+    } catch (err: any) {
+      return rejectWithValue(err.message || "Delete failed");
+    }
+  }
+);
 
 //  Thunk 2: Lọc danh mục theo "topic"
 export const filterCategories = createAsyncThunk( "categories/filter",async (topic: string, { rejectWithValue }) => {
@@ -46,46 +73,8 @@ export const filterCategories = createAsyncThunk( "categories/filter",async (top
   }
 );
 
-
-// Thunk 3: Thêm danh mục mới
-export const addCategory = createAsyncThunk("categories/add", async (category: { name: string; topic: string }, { rejectWithValue }) => {
-    try {
-      // Gọi API thêm category
-      return await addCategoryApi(category);
-    } catch (err: any) {
-      return rejectWithValue(err.message || "Add failed");
-    }
-  }
-);
-
-
-//  Thunk 4: Cập nhật danh mục
-export const updateCategory = createAsyncThunk( "categories/update", async (category: Category, { rejectWithValue }) => {
-    try {
-      // Gọi API cập nhật danh mục
-      return await updateCategoryApi(category);
-    } catch (err: any) {
-      return rejectWithValue(err.message || "Update failed");
-    }
-  }
-);
-
-
-//  Thunk 5: Xóa danh mục
-export const deleteCategory = createAsyncThunk( "categories/delete",async (id: number, { rejectWithValue }) => {
-    try {
-      await deleteCategoryApi(id);
-      return id; // Trả về id để reducer biết danh mục nào cần xóa khỏi state
-    } catch (err: any) {
-      return rejectWithValue(err.message || "Delete failed");
-    }
-  }
-);
-
-
 // Tạo Slice quản lý categories
-const categoriesSlice = createSlice({ name: "categories",initialState,
-  reducers: {
+const categoriesSlice = createSlice({ name: "categories",initialState, reducers: {
     //  Action sync: thay đổi bộ lọc hiện tại (không cần gọi API)
     setFilter(state, action) {
       state.currentFilter = action.payload;

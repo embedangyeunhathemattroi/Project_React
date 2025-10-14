@@ -1,57 +1,164 @@
-html,
-body,
-#root {
-  height: 100%;
-  margin: 0;
-}
-
-.page-container {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-
-.content-wrap {
-  flex: 1 0 auto;
-}
-
+/* ==================== FLASHCARD LAYOUT ==================== */
 .flashcard-container {
   display: flex;
   justify-content: center;
-  margin-bottom: 1rem;
-}
-
-/* Flip card */
-.flashcard {
-  width: 200px;
-  height: 120px;
-  perspective: 1000px;
-  cursor: pointer;
-  position: relative;
-}
-
-.flashcard .front,
-.flashcard .back {
-  width: 100%;
-  height: 100%;
-  position: absolute;
-  backface-visibility: hidden;
-  display: flex;
   align-items: center;
+  margin-bottom: 25px;
+}
+
+.flashcard-wrapper {
+  display: flex;
   justify-content: center;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  font-size: 18px;
+  align-items: center;
+  perspective: 1000px;
 }
 
-.flashcard .back {
+.flashcard-front,
+.flashcard-back {
+  background-color: #fff !important;
+  color: #212529;
+  border-radius: 16px;
+  width: 700px;
+  height: 400px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 28px;
+  font-weight: 600;
+  backface-visibility: hidden;
+  transition: transform 0.6s ease;
+}
+
+.flashcard {
+  position: relative;
+  width: 700px;
+  height: 400px;
+  transform-style: preserve-3d;
+  cursor: pointer;
+}
+
+.flashcard.flipped .flashcard-front {
   transform: rotateY(180deg);
 }
 
-.flashcard.flipped .front {
-  transform: rotateY(180deg);
-}
-
-.flashcard.flipped .back {
+.flashcard.flipped .flashcard-back {
   transform: rotateY(0deg);
+}
+
+.flashcard-empty {
+  width: 700px;
+  height: 400px;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #888;
+  font-size: 22px;
+  font-weight: 500;
+}
+
+/* ==================== PROGRESS BAR ==================== */
+.progress-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 700px;
+  margin: 0 auto 10px;
+}
+
+.progress {
+  flex: 1;
+  height: 18px;
+  border-radius: 10px;
+  background-color: #e9ecef;
+  overflow: hidden;
+  margin-right: 10px;
+}
+
+.progress-bar {
+  background-color: #28a745;
+  transition: width 0.4s ease;
+  border-radius: 10px;
+}
+
+.progress-info {
+  font-size: 14px;
+  color: #555;
+  font-weight: 500;
+  min-width: 70px;
+  text-align: right;
+}
+
+/* ==================== TABLE ==================== */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 25px;
+  border: none;
+}
+
+th {
+  font-weight: 700;
+  color: #222;
+  background-color: #f5f7fb;
+  padding: 12px 10px;
+  text-align: left;
+  border: none;
+}
+
+td {
+  color: #555;
+  font-weight: 400;
+  border: none;
+  padding: 10px;
+  background-color: #fff;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+.table-bordered {
+  border: none !important;
+  background: transparent;
+}
+
+tbody tr:hover td {
+  background-color: #f9fafc;
+}
+
+/* ==================== BUTTONS ==================== */
+.btn-lg {
+  padding: 10px 24px;
+  font-size: 16px;
+  border-radius: 10px;
+}
+
+.btn-success {
+  background-color: #28a745;
+  border: none;
+}
+
+.btn-success:hover {
+  background-color: #218838;
+}
+
+/* ==================== PAGE BACKGROUND ==================== */
+body {
+  background-color: #f8f9fa;
+}
+
+/* ==================== LEARNED ROW ==================== */
+.row-learned {
+  background-color: #e9fbe9 !important;
+  transition: background 0.3s ease;
+}
+
+.row-learned td {
+  color: #212529 !important;
+  font-weight: 500;
 }

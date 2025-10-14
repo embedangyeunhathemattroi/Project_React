@@ -213,8 +213,8 @@
   "categories": [
     {
       "id": 1,
-      "name": "Con Vật",
-      "topic": "con-vt",
+      "name": "Động Vật",
+      "topic": "ng-vt",
       "description": "Các loài động vật phổ biến nhất",
       "createdAt": "2024-10-15T10:00:00Z"
     },
@@ -302,25 +302,38 @@
       "id": 17
     },
     {
-      "name": "Animal",
-      "topic": "Animal",
-      "createdAt": "2025-10-07T10:02:31.684Z",
+      "name": "Trí Tuệ Nhân Tạo",
+      "description": "Các từ vựng về trí tuệ nhân tạo 2025",
+      "topic": "tr-tu-nhn-to",
+      "createdAt": "2025-10-09T12:46:25.143Z",
       "id": 18
+    },
+    {
+      "name": "Diễn Viên",
+      "description": "là những người diễn xuất trên màn ảnh nhỏ",
+      "topic": "din-vin",
+      "createdAt": "2025-10-09T13:00:36.760Z",
+      "id": 19
+    },
+    {
+      "name": "Action",
+      "topic": "action",
+      "createdAt": "2025-10-13T07:32:00.025Z",
+      "id": 21,
+      "description": "Hành Động"
+    },
+    {
+      "name": "Sữa",
+      "topic": "Sữa",
+      "createdAt": "2025-10-13T07:32:55.873Z",
+      "id": 22
     }
   ],
   "vocabs": [
     {
-      "id": 101,
-      "word": "Cat",
-      "meaning": "Con mèo",
-      "categoryId": 1,
-      "isLearned": false,
-      "topic": "Animal"
-    },
-    {
       "id": 103,
       "word": "Elephant",
-      "meaning": "Con voi",
+      "meaning": "Con vois",
       "categoryId": 1,
       "isLearned": false,
       "topic": "Animal"
@@ -380,14 +393,6 @@
       "categoryId": 1,
       "isLearned": false,
       "topic": "Animal"
-    },
-    {
-      "id": 201,
-      "word": "Run",
-      "meaning": "Chạy",
-      "categoryId": 2,
-      "isLearned": false,
-      "topic": "Action"
     },
     {
       "id": 202,
@@ -708,8 +713,8 @@
       "id": 511
     },
     {
-      "word": "milk",
-      "meaning": "sữa",
+      "word": "Milk",
+      "meaning": "Sữa bò",
       "topic": "Sữa",
       "id": 512
     },
@@ -718,6 +723,30 @@
       "meaning": "học sinh",
       "topic": "students",
       "id": 513
+    },
+    {
+      "word": "Angry bird",
+      "meaning": "Chim nổi giận",
+      "topic": "Animal",
+      "id": 514
+    },
+    {
+      "word": "Biggest",
+      "meaning": "To nhất",
+      "topic": "Adjective",
+      "id": 515
+    },
+    {
+      "word": "Gray",
+      "meaning": "Màu xám",
+      "topic": "Color",
+      "id": 516
+    },
+    {
+      "word": "Butter",
+      "meaning": "Bơ",
+      "topic": "Sữa",
+      "id": 517
     }
   ],
   "question": [
@@ -1094,6 +1123,45 @@
         }
       ],
       "id": 1759460975215
+    },
+    {
+      "date": "2025-10-14T08:45:44.310Z",
+      "category": "Animal",
+      "score": 3,
+      "total": 5,
+      "answers": [
+        {
+          "questionId": 1,
+          "selected": "Con bướm",
+          "correct": "Con mèo",
+          "isCorrect": false
+        },
+        {
+          "questionId": 2,
+          "selected": "Con chó",
+          "correct": "Con chó",
+          "isCorrect": true
+        },
+        {
+          "questionId": 3,
+          "selected": "Con voi",
+          "correct": "Con voi",
+          "isCorrect": true
+        },
+        {
+          "questionId": 4,
+          "selected": "Sư tử",
+          "correct": "Con hổ",
+          "isCorrect": false
+        },
+        {
+          "questionId": 5,
+          "selected": "Sư tử",
+          "correct": "Sư tử",
+          "isCorrect": true
+        }
+      ],
+      "id": 1759460975216
     }
   ]
 }
