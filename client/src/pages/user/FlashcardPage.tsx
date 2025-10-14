@@ -1,11 +1,12 @@
 import React from "react";
-import axios from "axios"; 
+import axios from "axios";
 import "./FlashCardPage.css";
-import PaginationAntd from "../../components/common/Pagination"; 
-import Footer from "../../components/common/Footer"; 
-import FlashCard from "../../components/UI/FlashCard"; 
-import Swal from "sweetalert2"; 
-import { Table } from "antd"; 
+import PaginationAntd from "../../components/common/Pagination";
+import Footer from "../../components/common/Footer";
+import FlashCard from "../../components/UI/FlashCard";
+import Swal from "sweetalert2";
+import { Table } from "antd";
+
 interface Vocab {
   id: number;
   word: string;
@@ -24,14 +25,14 @@ interface Category {
 interface State {
   vocabs: Vocab[];
   categories: Category[];
-  currentIndex: number; // Vị trí từ hiện tại trong danh sách
-  filterCategoryId: number | "All"; // Bộ lọc danh mục hiện tại
-  flipped: boolean; 
-  loading: boolean; 
+  currentIndex: number;
+  filterCategoryId: number | "All";
+  flipped: boolean;
+  loading: boolean;
   error: string | null;
   currentPage: number;
-  pageSize: number; 
-  searchTerm: string; 
+  pageSize: number;
+  searchTerm: string;
 }
 
 class FlashCardPage extends React.Component<{}, State> {
@@ -48,14 +49,12 @@ class FlashCardPage extends React.Component<{}, State> {
     searchTerm: "",
   };
 
-  // ========================== GỌI API KHI VỪA MỞ TRANG ==========================
   componentDidMount() {
     this.fetchData();
   }
 
-  // ========================== LẤY DỮ LIỆU TỪ SERVER ==========================
   fetchData = async () => {
-    this.setState({ loading: true }); 
+    this.setState({ loading: true });
     try {
       const [vocabsRes, categoriesRes] = await Promise.all([
         axios.get<Vocab[]>("http://localhost:8080/vocabs"),
@@ -74,30 +73,57 @@ class FlashCardPage extends React.Component<{}, State> {
     }
   };
 
-  // ========================== XỬ LÝ HÀNH ĐỘNG NGƯỜI DÙNG ==========================
   handleFlip = () => {
     this.setState({ flipped: !this.state.flipped });
   };
-  handleNext = () => {
-    const filtered = this.getFilteredVocabs();
-    const { currentIndex } = this.state;
-    if (filtered.length === 0) return; 
 
-    if (currentIndex < filtered.length - 1) {
-      this.setState({
-        currentIndex: currentIndex + 1,
-        flipped: false, 
-      });
-    } else {
-      Swal.fire({
-        title: "🎉 Hoàn thành!",
-        text: "Bạn đã học hết các từ trong chủ đề này!",
-        imageUrl: "https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExMW9obDY2dXVia3prMGF6cnZ4bGZjcmk3ZDg4OHk2bzNwbTlscDU4OCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/5Sl1sMiMJTgXXTZjrL/giphy.gif",
-        imageWidth: 400,
-        imageHeight: 200,
-      });
-    }
-  };
+  handleNext = () => {
+  const filtered = this.getFilteredVocabs();
+  const { currentIndex } = this.state;
+
+  if (filtered.length === 0) return;
+
+  if (currentIndex < filtered.length - 1) {
+    this.setState({
+      currentIndex: currentIndex + 1,
+      flipped: false,
+    });
+    return;
+  }
+  const total = filtered.length;
+  const learnedCount = filtered.filter((v) => v.isLearned).length;
+  const remaining = total - learnedCount;
+
+  if (remaining === 0 && total > 0) {
+
+    Swal.fire({
+      title: "🎉 Chúc mừng!",
+      text: "Bạn đã học xong toàn bộ danh sách từ vựng trong danh mục này!",
+      imageUrl: "https://media.giphy.com/media/111ebonMs90YLu/giphy.gif",
+      imageWidth: 400,
+      imageHeight: 200,
+      confirmButtonText: "Tuyệt vời!",
+    }).then(() => {
+
+      this.setState({ currentIndex: 0, flipped: false });
+    });
+  } else {
+
+    Swal.fire({
+      icon: "info",
+      title: "📘 Vẫn còn vài từ chưa học!",
+      text: `Bạn đã học được ${learnedCount}/${total} từ.\nCòn lại ${remaining} từ chưa học.`,
+      imageUrl:
+        "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExdGF4c3RwOGE5YzB2eGh5cDd4MWl0ZHZkYm9oZzB3eWRqemRkZ3EwZSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/wpoLqr5FT1sY0/giphy.gif",
+      imageWidth: 350,
+      imageHeight: 180,
+      confirmButtonText: "Tiếp tục",
+    });
+  }
+};
+
+
+
 
   handlePrevious = () => {
     const { currentIndex } = this.state;
@@ -120,29 +146,37 @@ class FlashCardPage extends React.Component<{}, State> {
     const { currentIndex } = this.state;
     const current = filtered[currentIndex];
     if (!current) return;
-    this.setState(
-      (prev) => ({
-        vocabs: prev.vocabs.map((v) =>
-          v.id === current.id ? { ...v, isLearned: true } : v
-        ),
-      }),
-      () => {
-        const updatedFiltered = this.getFilteredVocabs();
-        const unlearnedLeft = updatedFiltered.filter((v) => !v.isLearned).length;
-        if (unlearnedLeft === 0) {
-          Swal.fire({
-            title: "Tuyệt vời 🎇",
-            text: "Bạn đã học hết tất cả từ trong chủ đề này!",
-            imageUrl: "https://media.giphy.com/media/111ebonMs90YLu/giphy.gif",
-            imageWidth: 400,
-            imageHeight: 200,
-          });
-        } else {
-          this.handleNext();
-        }
-      }
-    );
+
+    this.setState((prev) => ({
+      vocabs: prev.vocabs.map((v) =>
+        v.id === current.id ? { ...v, isLearned: true } : v
+      ),
+    }));
   };
+
+  componentDidUpdate(prevProps: {}, prevState: State) {
+  const { filterCategoryId, vocabs } = this.state;
+  if (
+    prevState.vocabs !== vocabs ||
+    prevState.filterCategoryId !== filterCategoryId
+  ) {
+    const filtered = this.getFilteredVocabs();
+    const total = filtered.length;
+    const learnedCount = filtered.filter((v) => v.isLearned).length;
+
+    if (total > 0 && learnedCount === total) {
+      Swal.fire({
+        title: "🎉 Chúc mừng!",
+        text: "Bạn đã học xong toàn bộ danh sách từ vựng trong danh mục này!",
+        imageUrl: "https://media.giphy.com/media/111ebonMs90YLu/giphy.gif",
+        imageWidth: 400,
+        imageHeight: 200,
+        confirmButtonText: "Tuyệt vời!",
+      });
+    }
+  }
+}
+
 
   handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value === "All" ? "All" : Number(e.target.value);
@@ -154,14 +188,12 @@ class FlashCardPage extends React.Component<{}, State> {
     });
   };
 
-  // ========================== HÀM LỌC DỮ LIỆU ==========================
   getFilteredVocabs = () => {
     const { vocabs, filterCategoryId, searchTerm } = this.state;
     let filtered = vocabs;
     if (filterCategoryId !== "All") {
       filtered = filtered.filter((v) => v.categoryId === filterCategoryId);
     }
-
     if (searchTerm.trim() !== "") {
       filtered = filtered.filter(
         (v) =>
@@ -169,9 +201,9 @@ class FlashCardPage extends React.Component<{}, State> {
           v.meaning.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
-
     return filtered;
   };
+
   getPagedVocabs = () => {
     const { currentPage, pageSize } = this.state;
     const filtered = this.getFilteredVocabs();
@@ -184,7 +216,24 @@ class FlashCardPage extends React.Component<{}, State> {
     return sorted.slice(start, end);
   };
 
-  // ========================== GIAO DIỆN (RENDER) ==========================
+  handleRowClick = (record: any) => {
+    const filtered = this.getFilteredVocabs();
+    const index = filtered.findIndex((v) => v.id === record.key);
+    if (index !== -1) {
+      this.setState({
+        currentIndex: index,
+        flipped: false,
+      });
+      Swal.fire({
+        icon: "info",
+        title: "📖 Học từ này",
+        text: `Từ "${record.word}" đã được hiển thị trên flashcard.`,
+        timer: 1000,
+        showConfirmButton: false,
+      });
+    }
+  };
+
   render() {
     const {
       categories,
@@ -200,10 +249,11 @@ class FlashCardPage extends React.Component<{}, State> {
     const currentVocab = filteredVocabs[currentIndex] || null;
     const pagedVocabs = this.getPagedVocabs();
 
-    // Tính tiến độ học (%)
     const total = filteredVocabs.length;
     const learnedCount = filteredVocabs.filter((v) => v.isLearned).length;
-    const progressPercent = total === 0 ? 0 : (learnedCount / total) * 100;
+    const progressPercent =
+      total === 0 ? 0 : Math.min((learnedCount / total) * 100, 100);
+
     if (loading) return <div className="container mt-5">Loading...</div>;
     if (error) return <div className="container mt-5 text-danger">{error}</div>;
 
@@ -230,18 +280,6 @@ class FlashCardPage extends React.Component<{}, State> {
             ))}
           </select>
 
-          {/* ======== Ô TÌM KIẾM ======== */}
-          {/* <input
-            type="text"
-            className="form-control mb-3"
-            placeholder="Search vocabulary..."
-            value={this.state.searchTerm}
-            onChange={(e) =>
-              this.setState({ searchTerm: e.target.value, currentIndex: 0 })
-            }
-          /> */}
-
-          {/* ======== KHU VỰC FLASHCARD ======== */}
           <div className="flashcard-container mb-3">
             {currentVocab ? (
               <div className="flashcard-wrapper">
@@ -252,11 +290,10 @@ class FlashCardPage extends React.Component<{}, State> {
                   onFlip={this.handleFlip}
                   width="700px"
                   height="400px"
-                  backgroundColor="#fff" 
+                  backgroundColor="#fff"
                 />
               </div>
             ) : (
-              // Nếu không có từ nào
               <div
                 style={{
                   width: "100%",
@@ -273,6 +310,7 @@ class FlashCardPage extends React.Component<{}, State> {
               </div>
             )}
           </div>
+
           <div className="mb-3 d-flex justify-content-center gap-3 flex-wrap">
             <button
               className="btn btn-primary btn-lg"
@@ -293,19 +331,22 @@ class FlashCardPage extends React.Component<{}, State> {
             <button
               className="btn btn-primary btn-lg"
               onClick={this.handleNext}
-              disabled={currentIndex >= total - 1}
+              // disabled={currentIndex >= total - 1}
             >
               Next
             </button>
           </div>
 
-          {/* ======== THANH TIẾN TRÌNH ======== */}
+          {/* ======== Thanh tiến trình ======== */}
           <div
             className="mb-5 mx-auto"
             style={{ width: "700px", textAlign: "center" }}
           >
             <label className="fw-bold mb-2">Progress</label>
-            <div className="progress" style={{ height: "20px", borderRadius: "10px" }}>
+            <div
+              className="progress"
+              style={{ height: "20px", borderRadius: "10px" }}
+            >
               <div
                 className="progress-bar bg-success"
                 role="progressbar"
@@ -321,7 +362,6 @@ class FlashCardPage extends React.Component<{}, State> {
             </div>
           </div>
 
-          {/* ======== BẢNG DANH SÁCH TỪ VỰNG ======== */}
           <div className="mx-auto" style={{ width: "100%" }}>
             <h5 className="mb-3">
               <strong>Word List</strong>
@@ -355,10 +395,12 @@ class FlashCardPage extends React.Component<{}, State> {
                   ),
                 },
               ]}
+              onRow={(record) => ({
+                onClick: () => this.handleRowClick(record),
+              })}
             />
           </div>
 
-          {/* ======== PHÂN TRANG ======== */}
           <div className="d-flex justify-content-center mt-4">
             <PaginationAntd
               currentPage={currentPage}
@@ -376,4 +418,3 @@ class FlashCardPage extends React.Component<{}, State> {
 }
 
 export default FlashCardPage;
-//thanh tiến trình chưa đúng, chưa học xong đã hiện ra chúc mừng

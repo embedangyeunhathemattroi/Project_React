@@ -93,86 +93,128 @@ const QuizPage: React.FC = () => {
   };
 
   // ----- Sang câu tiếp theo hoặc kết thúc quiz -----
-  const handleNext = async () => {
-    const currentQuestion = filteredQuestions[currentIndex];
+ // ----- Sang câu tiếp theo hoặc kết thúc quiz -----
+const handleNext = async () => {
+  const currentQuestion = filteredQuestions[currentIndex];
 
-    // nếu chưa chọn đáp án và quiz chưa finish => return
-    if (!selectedAnswer && !quizFinished) return;
+  // nếu chưa chọn đáp án và quiz chưa finish => return
+  if (!selectedAnswer && !quizFinished) return;
 
-    const isCorrect = selectedAnswer === currentQuestion.answer; // kiểm tra đúng/sai
-    if (!quizFinished && isCorrect) setScore(prev => prev + 1); // cộng điểm nếu đúng
+  const isCorrect = selectedAnswer === currentQuestion.answer; // kiểm tra đúng/sai
+  if (!quizFinished && isCorrect) setScore(prev => prev + 1); // cộng điểm nếu đúng
 
-    // lưu câu trả lời vào answers
-    if (!quizFinished) {
-      setAnswers(prev => [
-        ...prev.filter(a => a.questionId !== currentQuestion.id), // xóa record cũ nếu có
-        {
-          questionId: currentQuestion.id,
-          selected: selectedAnswer!,
-          correct: currentQuestion.answer,
-          isCorrect,
-        }
-      ]);
-    }
+  // lưu câu trả lời vào answers
+  if (!quizFinished) {
+    setAnswers(prev => [
+      ...prev.filter(a => a.questionId !== currentQuestion.id),
+      {
+        questionId: currentQuestion.id,
+        selected: selectedAnswer!,
+        correct: currentQuestion.answer,
+        isCorrect,
+      },
+    ]);
+  }
 
-    setSelectedAnswer(null); // reset lựa chọn để sang câu mới
+  setSelectedAnswer(null); // reset lựa chọn
 
-    // nếu chưa phải câu cuối => next câu
-    if (currentIndex < filteredQuestions.length - 1) {
-      setCurrentIndex(prev => prev + 1);
-    } else {
-      // câu cuối => finish quiz
-      setQuizFinished(true);
-      setQuizStarted(false);
+  // nếu chưa phải câu cuối => next câu
+  if (currentIndex < filteredQuestions.length - 1) {
+    setCurrentIndex(prev => prev + 1);
+  } else {
+    // câu cuối => finish quiz
+    setQuizFinished(true);
+    setQuizStarted(false);
 
-      const finalScore = score + (isCorrect ? 1 : 0); // tính điểm cuối
-      const percent = Math.round((finalScore / totalQuestions) * 100); // tính % đúng
+    const finalScore = score + (isCorrect ? 1 : 0);
+    const percent = Math.round((finalScore / totalQuestions) * 100);
 
-      // Hiển thị kết quả quiz + review tất cả câu trả lời
+    // ✅ SweetAlert chia 2 trường hợp
+    if (percent === 100) {
+      // 🎉 Đúng hết 100%
       Swal.fire({
-        title: percent >= 70 ? "Great Job! " : "Keep Trying! ",
+        title: "🎉 Amazing! Perfect Score!",
+        html: `
+          <p>You got <strong>${finalScore}/${totalQuestions}</strong> — every answer correct!</p>
+          <p>You're a true vocabulary master!</p>
+        `,
+        icon: "success",
+        background: "#f0fff0",
+        confirmButtonText: "Awesome!",
+        width: 500,
+      });
+    } else if (percent >= 70) {
+      // ✅ Đúng trên 70%
+      Swal.fire({
+        title: "Great Job! 💪",
         html: `
           <p>You scored ${finalScore} / ${totalQuestions} (${percent}%)</p>
-          <h4>Answer Review:</h4>
-          <ul>
-            ${answers.map(a => {
-              const q = filteredQuestions.find(q => q.id === a.questionId);
-              return `<li><strong>${q?.question}</strong><br/>
-                      Your answer: ${a.selected} ${a.isCorrect ? "✔" : "✖"}<br/>
-                      Correct: ${a.correct}</li>`;
-            }).join("")}
-            <li><strong>${currentQuestion.question}</strong><br/>
-            Your answer: ${selectedAnswer} ${isCorrect ? "&#10004;" : "&#10006;"}
-<br/>
-            Correct: ${currentQuestion.answer}</li>
-          </ul>
+          <p>Keep it up and aim for perfection!</p>
         `,
-        icon: percent >= 70 ? "success" : "warning",
-        width: 600
+        icon: "success",
+        width: 500,
       });
-
-      // Lưu kết quả quiz vào backend
-      try {
-        await fetch("http://localhost:8080/results", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            date: new Date().toISOString(),
-            category: selectedCategory,
-            score: finalScore,
-            total: totalQuestions,
-            answers: [
-              ...answers,
-              { questionId: currentQuestion.id, selected: selectedAnswer!, correct: currentQuestion.answer, isCorrect }
-            ]
-          })
-        });
-        dispatch(fetchResults()); // reload redux history
-      } catch (err) {
-        console.error("Failed to save result:", err);
-      }
+    } else {
+      // ❌ Sai nhiều hơn 30%
+      Swal.fire({
+        title: "Keep Trying! ⚠️",
+        html: `
+          <p>You scored ${finalScore} / ${totalQuestions} (${percent}%)</p>
+          <p>Don't give up — review the words and try again!</p>
+        `,
+        icon: "warning",
+        width: 500,
+      });
     }
-  };
+
+    // ✅ Review tất cả câu trả lời sau khi quiz kết thúc
+    const reviewHTML = `
+      <h4 style="margin-top:10px;">Answer Review:</h4>
+      <ul style="text-align:left;">
+        ${answers
+          .map(a => {
+            const q = filteredQuestions.find(q => q.id === a.questionId);
+            return `<li>
+              <strong>${q?.question}</strong><br/>
+              Your answer: ${a.selected} ${a.isCorrect ? "✔️" : "❌"}<br/>
+              Correct: ${a.correct}
+            </li>`;
+          })
+          .join("")}
+        <li><strong>${currentQuestion.question}</strong><br/>
+        Your answer: ${selectedAnswer} ${isCorrect ? "✔️" : "❌"}<br/>
+        Correct: ${currentQuestion.answer}</li>
+      </ul>
+    `;
+    console.log(reviewHTML); // có thể dùng sau nếu muốn hiển thị review chi tiết riêng
+
+    // ✅ Lưu kết quả quiz vào backend
+    try {
+      await fetch("http://localhost:8080/results", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          date: new Date().toISOString(),
+          category: selectedCategory,
+          score: finalScore,
+          total: totalQuestions,
+          answers: [
+            ...answers,
+            {
+              questionId: currentQuestion.id,
+              selected: selectedAnswer!,
+              correct: currentQuestion.answer,
+              isCorrect,
+            },
+          ],
+        }),
+      });
+      dispatch(fetchResults());
+    } catch (err) {
+      console.error("Failed to save result:", err);
+    }
+  }
+};
 
   // ----- Thêm câu hỏi mới -----
   const handleAddQuestion = () => {
@@ -262,17 +304,37 @@ const handleModalOk = () => {
 
 // ----- Render component QuizPage -----
 return (
-  <div style={{ maxWidth: '92%',maxHeight: '100%', padding: 10, margin: "20px auto", minHeight: "80vh", display: "flex", flexDirection: "column" }}>
+  <div
+    style={{
+      maxWidth: "92%",
+      maxHeight: "100%",
+      padding: 10,
+      margin: "20px auto",
+      minHeight: "80vh",
+      display: "flex",
+      flexDirection: "column",
+      position: "relative",
+      paddingBottom: 100, // ✅ thêm khoảng trống để footer không đè lên
+    }}
+  >
     {/* Header: title + Start Quiz + Manage Questions */}
     <Row style={{ marginBottom: 20, display: "flex", alignItems: "center" }}>
-      <Col flex="auto"><h2><strong>Vocabulary Quiz</strong></h2></Col> {/* title */}
+      <Col flex="auto">
+        <h2>
+          <strong>Vocabulary Quiz</strong>
+        </h2>
+      </Col>
       <Col>
         {!quizStarted && (
           <>
-            {/* Nút bắt đầu quiz */}
-            <Button type="primary" onClick={handleStartQuiz} style={{ marginRight: 10 }}>Start Quiz</Button>
-            {/* Nút chuyển qua chế độ quản lý câu hỏi */}
-            <Button onClick={() => setManageMode(prev => !prev)}>
+            <Button
+              type="primary"
+              onClick={handleStartQuiz}
+              style={{ marginRight: 10 }}
+            >
+              Start Quiz
+            </Button>
+            <Button onClick={() => setManageMode((prev) => !prev)}>
               {manageMode ? "Back to Quiz" : "Manage Questions"}
             </Button>
           </>
@@ -280,81 +342,97 @@ return (
       </Col>
     </Row>
 
-    {/* ----- Manage Mode: thêm/sửa/xóa câu hỏi ----- */}
+    {/* ----- Manage Mode ----- */}
     {manageMode && (
       <Card style={{ marginBottom: 20 }}>
         <Row gutter={16} align="middle">
           <Col flex="1">
-            {/* Input tìm kiếm câu hỏi */}
             <Input
               placeholder="Search question..."
               value={searchText}
-              onChange={e => setSearchText(e.target.value)}
+              onChange={(e) => setSearchText(e.target.value)}
             />
           </Col>
           <Col>
-            {/* Select filter category */}
             <Select
               value={selectedCategory}
               style={{ width: 200 }}
-              onChange={value => setSelectedCategory(value)}
+              onChange={(value) => setSelectedCategory(value)}
             >
               <Option value="All Categories">All Categories</Option>
-              {/* Lấy danh sách category duy nhất từ questions */}
-              {[...new Set(questions.map(q => q.category))].map(cat => (
-                <Option key={cat} value={cat}>{cat}</Option>
+              {[...new Set(questions.map((q) => q.category))].map((cat) => (
+                <Option key={cat} value={cat}>
+                  {cat}
+                </Option>
               ))}
             </Select>
           </Col>
           <Col>
-            {/* Nút thêm câu hỏi mới */}
-            <Button type="primary" onClick={handleAddQuestion}>Add Question</Button>
+            <Button type="primary" onClick={handleAddQuestion}>
+              Add Question
+            </Button>
           </Col>
         </Row>
 
-        {/* Table hiển thị câu hỏi */}
         <Table
           style={{ marginTop: 30 }}
-          dataSource={filteredQuestions} // dữ liệu filter theo category + search
+          dataSource={filteredQuestions}
           rowKey="id"
           columns={[
-            { title: "Question", dataIndex: "question", key: "question" }, // cột question
-            { title: "Category", dataIndex: "category", key: "category" }, // cột category
+            { title: "Question", dataIndex: "question", key: "question" },
+            { title: "Category", dataIndex: "category", key: "category" },
             {
               title: "Actions",
               key: "actions",
               render: (_, record: Question) => (
                 <div style={{ display: "flex", gap: 10 }}>
-                  {/* Nút edit */}
-                  <Button onClick={() => handleEditQuestion(record)}>Edit</Button>
-                  {/* Nút delete */}
-                  <Button danger onClick={() => handleDeleteQuestion(record.id)}>Delete</Button>
+                  <Button onClick={() => handleEditQuestion(record)}>
+                    Edit
+                  </Button>
+                  <Button danger onClick={() => handleDeleteQuestion(record.id)}>
+                    Delete
+                  </Button>
                 </div>
-              )
-            }
+              ),
+            },
           ]}
-          pagination={{ pageSize }} // phân trang
+          pagination={{ pageSize }}
         />
 
-        {/* Modal thêm/sửa câu hỏi */}
         <Modal
-          title={editingQuestion ? "Edit Question" : "Add Question"} // title khác nhau
+          title={editingQuestion ? "Edit Question" : "Add Question"}
           open={modalVisible}
-          onOk={handleModalOk}       // khi bấm OK gọi handleModalOk
+          onOk={handleModalOk}
           onCancel={() => setModalVisible(false)}
-          okText={editingQuestion ? "Update" : "Add"} // text nút OK
+          okText={editingQuestion ? "Update" : "Add"}
         >
           <Form form={form} layout="vertical">
-            <Form.Item name="question" label="Question" rules={[{ required: true }]}>
+            <Form.Item
+              name="question"
+              label="Question"
+              rules={[{ required: true }]}
+            >
               <Input />
             </Form.Item>
-            <Form.Item name="category" label="Category" rules={[{ required: true }]}>
+            <Form.Item
+              name="category"
+              label="Category"
+              rules={[{ required: true }]}
+            >
               <Input />
             </Form.Item>
-            <Form.Item name="options" label="Options (comma separated)" rules={[{ required: true }]}>
+            <Form.Item
+              name="options"
+              label="Options (comma separated)"
+              rules={[{ required: true }]}
+            >
               <Input />
             </Form.Item>
-            <Form.Item name="answer" label="Correct Answer" rules={[{ required: true }]}>
+            <Form.Item
+              name="answer"
+              label="Correct Answer"
+              rules={[{ required: true }]}
+            >
               <Input />
             </Form.Item>
           </Form>
@@ -362,47 +440,62 @@ return (
       </Card>
     )}
 
-    {/* ----- Quiz Mode: hiển thị quiz ----- */}
+    {/* ----- Quiz Mode ----- */}
     {!manageMode && (
       <>
-        {/* Select filter category */}
         <Select
           style={{ width: "100%", marginBottom: 20 }}
           value={selectedCategory}
-          onChange={value => setSelectedCategory(value)}
-          disabled={quizStarted} // disable khi đang quiz
+          onChange={(value) => setSelectedCategory(value)}
+          disabled={quizStarted}
         >
           <Option value="All Categories">All Categories</Option>
-          {[...new Set(questions.map(q => q.category))].map(cat => (
-            <Option key={cat} value={cat}>{cat}</Option>
+          {[...new Set(questions.map((q) => q.category))].map((cat) => (
+            <Option key={cat} value={cat}>
+              {cat}
+            </Option>
           ))}
         </Select>
 
-        {/* Progress bar */}
         {quizStarted && (
           <Progress percent={quizProgress} style={{ marginBottom: 20 }} />
         )}
 
-        {/* Hiển thị câu hỏi */}
         {filteredQuestions.length > 0 && (quizStarted || quizFinished) && (
-          <Card style={{ width: "100%", boxShadow: "0 4px 8px rgba(0,0,0,0.1)", marginBottom: 20 }}>
-            <h3 style={{
-              backgroundColor: selectedAnswer || currentAnswerRecord ? "#e6f7e6" : "transparent",
-              padding: "5px 10px",
-              borderRadius: 4
-            }}>
-              {filteredQuestions[currentIndex].question} {/* câu hỏi hiện tại */}
+          <Card
+            style={{
+              width: "100%",
+              boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
+              marginBottom: 20,
+            }}
+          >
+            <h3
+              style={{
+                backgroundColor:
+                  selectedAnswer || currentAnswerRecord
+                    ? "#e6f7e6"
+                    : "transparent",
+                padding: "5px 10px",
+                borderRadius: 4,
+              }}
+            >
+              {filteredQuestions[currentIndex].question}
             </h3>
+
             <Radio.Group
-              value={selectedAnswer || currentAnswerRecord?.selected || null} // đáp án đang chọn hoặc đã trả lời trước
-              onChange={e => setSelectedAnswer(e.target.value)} // khi chọn option
+              value={selectedAnswer || currentAnswerRecord?.selected || null}
+              onChange={(e) => setSelectedAnswer(e.target.value)}
               style={{ width: "100%" }}
             >
-              {filteredQuestions[currentIndex].options.map(opt => {
-                const record = answers.find(a => a.questionId === filteredQuestions[currentIndex].id); // tìm record đã trả lời
-                const isSelected = selectedAnswer === opt || record?.selected === opt; // đánh dấu đang chọn
-                const correct = record?.correct === opt;   // kiểm tra option đúng
-                const wrong = record && record.selected === opt && !record.isCorrect; // kiểm tra option sai
+              {filteredQuestions[currentIndex].options.map((opt) => {
+                const record = answers.find(
+                  (a) => a.questionId === filteredQuestions[currentIndex].id
+                );
+                const isSelected =
+                  selectedAnswer === opt || record?.selected === opt;
+                const correct = record?.correct === opt;
+                const wrong =
+                  record && record.selected === opt && !record.isCorrect;
 
                 return (
                   <Radio
@@ -413,17 +506,22 @@ return (
                       margin: "8px 0",
                       padding: 5,
                       borderRadius: 4,
-                      backgroundColor: correct ? "#d9f7be" : wrong ? "#ffccc7" : (isSelected ? "#f0f9ff" : "transparent")
+                      backgroundColor: correct
+                        ? "#d9f7be"
+                        : wrong
+                        ? "#ffccc7"
+                        : isSelected
+                        ? "#f0f9ff"
+                        : "transparent",
                     }}
-                    disabled={quizFinished || !!record} // disable nếu quiz finish hoặc đã trả lời
+                    disabled={quizFinished || !!record}
                   >
-                    {opt} {/* hiển thị option */}
+                    {opt}
                   </Radio>
                 );
               })}
             </Radio.Group>
 
-            {/* Hiển thị điểm khi quiz finish */}
             {quizFinished && (
               <div style={{ marginTop: 10, fontWeight: "bold" }}>
                 Bạn đạt {score}/{filteredQuestions.length} câu đúng
@@ -432,37 +530,63 @@ return (
           </Card>
         )}
 
-        {/* Nút Prev / Next */}
         {quizStarted && (
-          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 20 }}>
-            <Button onClick={handlePrev} disabled={currentIndex === 0}>Prev</Button>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              marginBottom: 20,
+            }}
+          >
+            <Button onClick={handlePrev} disabled={currentIndex === 0}>
+              Prev
+            </Button>
             <Button type="primary" onClick={handleNext}>
-              {currentIndex < filteredQuestions.length - 1 ? "Next" : "Finish"} {/* Next hoặc Finish */}
+              {currentIndex < filteredQuestions.length - 1
+                ? "Next"
+                : "Finish"}
             </Button>
           </div>
         )}
 
-        {/* Quiz History */}
         <h3>Quiz History</h3>
-        {loading ? <Spin /> : (
+        {loading ? (
+          <Spin />
+        ) : (
           <>
             <Table
-              dataSource={results.slice((currentPage - 1) * pageSize, currentPage * pageSize)} // phân trang
+              dataSource={results.slice(
+                (currentPage - 1) * pageSize,
+                currentPage * pageSize
+              )}
               rowKey="id"
               columns={[
                 { title: "Date", dataIndex: "date", key: "date" },
                 { title: "Category", dataIndex: "category", key: "category" },
-                { title: "Score", dataIndex: "score", key: "score", render: (_: any, record: Result) => `${record.score}/${record.total}` },
+                {
+                  title: "Score",
+                  dataIndex: "score",
+                  key: "score",
+                  render: (_: any, record: Result) =>
+                    `${record.score}/${record.total}`,
+                },
               ]}
               pagination={false}
             />
-            <div style={{ marginTop: 10, display: "flex", justifyContent: "center" }}>
+            <div
+              style={{
+                marginTop: 20,
+                marginBottom: 60, 
+                display: "flex",
+                justifyContent: "center",
+              }}
+            >
               <Pagination
                 current={currentPage}
                 pageSize={pageSize}
                 total={results.length}
-                onChange={page => setCurrentPage(page)}
-                showSizeChanger={false} // không cho thay đổi pageSize
+                onChange={(page) => setCurrentPage(page)}
+                showSizeChanger={false}
               />
             </div>
           </>
@@ -479,4 +603,4 @@ return (
 };
 
 export default QuizPage; 
-//fix ở phân trang sau khi làm xong quiz thì phân trang k bị foooter đè lên 
+

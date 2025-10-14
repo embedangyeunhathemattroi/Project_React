@@ -1162,6 +1162,123 @@
         }
       ],
       "id": 1759460975216
+    },
+    {
+      "date": "2025-10-14T10:27:28.418Z",
+      "category": "Action",
+      "score": 5,
+      "total": 5,
+      "answers": [
+        {
+          "questionId": 6,
+          "selected": "Chạy",
+          "correct": "Chạy",
+          "isCorrect": true
+        },
+        {
+          "questionId": 7,
+          "selected": "Nhảy",
+          "correct": "Nhảy",
+          "isCorrect": true
+        },
+        {
+          "questionId": 8,
+          "selected": "Bơi",
+          "correct": "Bơi",
+          "isCorrect": true
+        },
+        {
+          "questionId": 9,
+          "selected": "Đọc",
+          "correct": "Đọc",
+          "isCorrect": true
+        },
+        {
+          "questionId": 10,
+          "selected": "Viết",
+          "correct": "Viết",
+          "isCorrect": true
+        }
+      ],
+      "id": 1759460975217
+    },
+    {
+      "date": "2025-10-14T10:27:55.769Z",
+      "category": "Animal",
+      "score": 3,
+      "total": 5,
+      "answers": [
+        {
+          "questionId": 1,
+          "selected": "Con mèo",
+          "correct": "Con mèo",
+          "isCorrect": true
+        },
+        {
+          "questionId": 2,
+          "selected": "Con chó",
+          "correct": "Con chó",
+          "isCorrect": true
+        },
+        {
+          "questionId": 3,
+          "selected": "Con hổ",
+          "correct": "Con voi",
+          "isCorrect": false
+        },
+        {
+          "questionId": 4,
+          "selected": "Con cừu",
+          "correct": "Con hổ",
+          "isCorrect": false
+        },
+        {
+          "questionId": 5,
+          "selected": "Sư tử",
+          "correct": "Sư tử",
+          "isCorrect": true
+        }
+      ],
+      "id": 1759460975218
+    },
+    {
+      "date": "2025-10-14T10:30:41.393Z",
+      "category": "Action",
+      "score": 5,
+      "total": 5,
+      "answers": [
+        {
+          "questionId": 6,
+          "selected": "Chạy",
+          "correct": "Chạy",
+          "isCorrect": true
+        },
+        {
+          "questionId": 7,
+          "selected": "Nhảy",
+          "correct": "Nhảy",
+          "isCorrect": true
+        },
+        {
+          "questionId": 8,
+          "selected": "Bơi",
+          "correct": "Bơi",
+          "isCorrect": true
+        },
+        {
+          "questionId": 9,
+          "selected": "Đọc",
+          "correct": "Đọc",
+          "isCorrect": true
+        },
+        {
+          "questionId": 10,
+          "selected": "Viết",
+          "correct": "Viết",
+          "isCorrect": true
+        }
+      ],
+      "id": 1759460975219
     }
   ]
 }
