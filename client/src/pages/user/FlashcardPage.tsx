@@ -111,7 +111,7 @@ class FlashCardPage extends React.Component<{}, State> {
 
     Swal.fire({
       icon: "info",
-      title: "📘 Vẫn còn vài từ chưa học!",
+      title: " Vẫn còn vài từ chưa học!",
       text: `Bạn đã học được ${learnedCount}/${total} từ.\nCòn lại ${remaining} từ chưa học.`,
       imageUrl:
         "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExdGF4c3RwOGE5YzB2eGh5cDd4MWl0ZHZkYm9oZzB3eWRqemRkZ3EwZSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/wpoLqr5FT1sY0/giphy.gif",

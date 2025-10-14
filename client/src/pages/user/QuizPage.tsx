@@ -6,104 +6,90 @@ import { fetchResults, type Result } from "../../stores/slices/resultSlice";
 import { useAppDispatch, useAppSelector } from "../../hook/hooks"; 
 
 const { Option } = Select; 
-// ----- Định nghĩa kiểu dữ liệu câu hỏi -----
 interface Question {
   id: number;         
   question: string;    
-  options: string[];   // các lựa chọn
-  answer: string;      // đáp án đúng
+  options: string[];  
+  answer: string;      
   category: string;    
 }
 
-// ----- Định nghĩa kiểu dữ liệu lưu câu trả lời -----
+
 interface AnswerRecord {
   questionId: number; 
-  selected: string;    // đáp án người dùng chọn
-  correct: string;     // đáp án đúng
-  isCorrect: boolean;  // đánh dấu đúng/sai
+  selected: string;  
+  correct: string;     
+  isCorrect: boolean;
 }
 
 const QuizPage: React.FC = () => {
   const dispatch = useAppDispatch(); 
   const { results, loading } = useAppSelector(state => state.result); 
-  const [questions, setQuestions] = useState<Question[]>([]); // danh sách câu hỏi
-  const [selectedCategory, setSelectedCategory] = useState("All Categories"); // filter theo category
-  const [quizStarted, setQuizStarted] = useState(false);   // trạng thái quiz đang chạy
-  const [currentIndex, setCurrentIndex] = useState(0);     // index câu hỏi hiện tại
-  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null); // đáp án đang chọn
-  const [answers, setAnswers] = useState<AnswerRecord[]>([]); // lưu tất cả câu trả lời trong quiz
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState("All Categories");
+  const [quizStarted, setQuizStarted] = useState(false); 
+  const [currentIndex, setCurrentIndex] = useState(0);     
+  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
+  const [answers, setAnswers] = useState<AnswerRecord[]>([]);
 
-  const [score, setScore] = useState(0);                 // điểm hiện tại
-  const [quizFinished, setQuizFinished] = useState(false); // quiz đã kết thúc chưa
-  const [currentPage, setCurrentPage] = useState(1);     // phân trang lịch sử quiz
-  const pageSize = 5;                                    // số item trên 1 trang
-  const [manageMode, setManageMode] = useState(false);   // chế độ quản lý câu hỏi
+  const [score, setScore] = useState(0);                
+  const [quizFinished, setQuizFinished] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);     
+  const pageSize = 5;                                   
+  const [manageMode, setManageMode] = useState(false);  
 
-  const [modalVisible, setModalVisible] = useState(false); // modal thêm/sửa câu hỏi
-  const [editingQuestion, setEditingQuestion] = useState<Question | null>(null); // question đang edit
-  const [form] = Form.useForm();                          // form modal
+  const [modalVisible, setModalVisible] = useState(false);
+  const [editingQuestion, setEditingQuestion] = useState<Question | null>(null); 
+  const [form] = Form.useForm();                      
 
-  const [searchText, setSearchText] = useState("");       // filter theo text
-
-  // ----- Lấy danh sách câu hỏi và kết quả quiz khi component mount -----
+  const [searchText, setSearchText] = useState("");     
   useEffect(() => {
     const fetchQ = async () => {
       try {
         const res = await fetch("http://localhost:8080/question"); 
         const data = await res.json(); 
-        setQuestions(data); // lưu câu hỏi vào state
+        setQuestions(data); 
       } catch (err) {
         console.error(err); 
       }
     };
     fetchQ(); 
-    dispatch(fetchResults()); // load kết quả quiz từ redux
+    dispatch(fetchResults()); 
   }, [dispatch]);
 
-  // ----- Filter câu hỏi theo category + search -----
   const filteredQuestions = questions.filter(q =>
     (selectedCategory === "All Categories" || q.category === selectedCategory) &&
     q.question.toLowerCase().includes(searchText.toLowerCase())
   );
 
-  const answeredCount = answers.length;                   // số câu đã trả lời
-  const totalQuestions = filteredQuestions.length;        // tổng số câu sau filter
-  const quizProgress = totalQuestions > 0 ? Math.round((answeredCount / totalQuestions) * 100) : 0; // % tiến độ quiz
-  const currentAnswerRecord = answers.find(a => a.questionId === filteredQuestions[currentIndex]?.id); // lấy câu trả lời hiện tại nếu đã chọn
+  const answeredCount = answers.length;                  
+  const totalQuestions = filteredQuestions.length;       
+  const quizProgress = totalQuestions > 0 ? Math.round((answeredCount / totalQuestions) * 100) : 0; 
+  const currentAnswerRecord = answers.find(a => a.questionId === filteredQuestions[currentIndex]?.id);
 
-  // ----- Bắt đầu quiz -----
   const handleStartQuiz = () => {
-    setQuizStarted(true);       // bật trạng thái quiz
-    setCurrentIndex(0);         // bắt đầu từ câu đầu
-    setSelectedAnswer(null);    // reset lựa chọn
-    setAnswers([]);             // reset lịch sử trả lời
-    setScore(0);                // reset điểm
-    setQuizFinished(false);     // đánh dấu quiz chưa kết thúc
+    setQuizStarted(true);       
+    setCurrentIndex(0);        
+    setSelectedAnswer(null);   
+    setAnswers([]);             
+    setScore(0);                
+    setQuizFinished(false);     
   };
 
-  // ----- Quay lại câu trước -----
   const handlePrev = () => {
     if (currentIndex > 0) {
-      setCurrentIndex(prev => prev - 1); // giảm index câu hỏi
-
-      // load đáp án cũ nếu câu trước đã trả lời
+      setCurrentIndex(prev => prev - 1); 
       const prevAnswer = answers.find(a => a.questionId === filteredQuestions[currentIndex - 1]?.id);
-      setSelectedAnswer(prevAnswer?.selected || null); // nếu chưa trả lời, null
+      setSelectedAnswer(prevAnswer?.selected || null);
     }
   };
 
-  // ----- Sang câu tiếp theo hoặc kết thúc quiz -----
- // ----- Sang câu tiếp theo hoặc kết thúc quiz -----
 const handleNext = async () => {
   const currentQuestion = filteredQuestions[currentIndex];
-
-  // nếu chưa chọn đáp án và quiz chưa finish => return
   if (!selectedAnswer && !quizFinished) return;
 
-  const isCorrect = selectedAnswer === currentQuestion.answer; // kiểm tra đúng/sai
-  if (!quizFinished && isCorrect) setScore(prev => prev + 1); // cộng điểm nếu đúng
-
-  // lưu câu trả lời vào answers
+  const isCorrect = selectedAnswer === currentQuestion.answer;
+  if (!quizFinished && isCorrect) setScore(prev => prev + 1); 
   if (!quizFinished) {
     setAnswers(prev => [
       ...prev.filter(a => a.questionId !== currentQuestion.id),
@@ -116,20 +102,17 @@ const handleNext = async () => {
     ]);
   }
 
-  setSelectedAnswer(null); // reset lựa chọn
-
-  // nếu chưa phải câu cuối => next câu
+  setSelectedAnswer(null); 
   if (currentIndex < filteredQuestions.length - 1) {
     setCurrentIndex(prev => prev + 1);
   } else {
-    // câu cuối => finish quiz
+   
     setQuizFinished(true);
     setQuizStarted(false);
 
     const finalScore = score + (isCorrect ? 1 : 0);
     const percent = Math.round((finalScore / totalQuestions) * 100);
 
-    // ✅ SweetAlert chia 2 trường hợp
     if (percent === 100) {
       // 🎉 Đúng hết 100%
       Swal.fire({
@@ -144,7 +127,7 @@ const handleNext = async () => {
         width: 500,
       });
     } else if (percent >= 70) {
-      // ✅ Đúng trên 70%
+     
       Swal.fire({
         title: "Great Job! 💪",
         html: `
@@ -155,7 +138,7 @@ const handleNext = async () => {
         width: 500,
       });
     } else {
-      // ❌ Sai nhiều hơn 30%
+     
       Swal.fire({
         title: "Keep Trying! ⚠️",
         html: `
@@ -167,7 +150,6 @@ const handleNext = async () => {
       });
     }
 
-    // ✅ Review tất cả câu trả lời sau khi quiz kết thúc
     const reviewHTML = `
       <h4 style="margin-top:10px;">Answer Review:</h4>
       <ul style="text-align:left;">
@@ -186,9 +168,7 @@ const handleNext = async () => {
         Correct: ${currentQuestion.answer}</li>
       </ul>
     `;
-    console.log(reviewHTML); // có thể dùng sau nếu muốn hiển thị review chi tiết riêng
-
-    // ✅ Lưu kết quả quiz vào backend
+    console.log(reviewHTML); 
     try {
       await fetch("http://localhost:8080/results", {
         method: "POST",
@@ -216,26 +196,23 @@ const handleNext = async () => {
   }
 };
 
-  // ----- Thêm câu hỏi mới -----
   const handleAddQuestion = () => {
-    setEditingQuestion(null);   // không chỉnh sửa, thêm mới
-    form.resetFields();         // reset form
-    setModalVisible(true);      // mở modal
+    setEditingQuestion(null);  
+    form.resetFields();        
+    setModalVisible(true);     
   };
 
-  // ----- Chỉnh sửa câu hỏi -----
   const handleEditQuestion = (question: Question) => {
-    setEditingQuestion(question); // lưu question đang edit
-    form.setFieldsValue({         // set giá trị vào form
+    setEditingQuestion(question);
+    form.setFieldsValue({       
       question: question.question,
       category: question.category,
       answer: question.answer,
       options: question.options.join(", ")
     });
-    setModalVisible(true);        // mở modal
+    setModalVisible(true);      
   };
 
-  // ----- Xóa câu hỏi -----
   const handleDeleteQuestion = (id: number) => {
     Swal.fire({
       title: "Are you sure?",
@@ -245,26 +222,23 @@ const handleNext = async () => {
       confirmButtonText: "Yes, delete it!"
     }).then(result => {
       if (result.isConfirmed) {
-        setQuestions(prev => prev.filter(q => q.id !== id)); // xóa question khỏi state
+        setQuestions(prev => prev.filter(q => q.id !== id)); 
         Swal.fire("Deleted!", "Question has been deleted.", "success");
       }
     });
   };
-// ----- Hàm xử lý khi bấm OK trên Modal thêm/sửa câu hỏi -----
 const handleModalOk = () => {
-  // validate các trường trong form trước khi xử lý
-  form.validateFields().then(values => {
-    const newQuestionText = values.question.trim(); // lấy text câu hỏi và loại bỏ khoảng trắng thừa
-    const newCategory = values.category.trim();    // lấy category và trim
 
-    // ----- Kiểm tra câu hỏi trùng trong cùng category -----
+  form.validateFields().then(values => {
+    const newQuestionText = values.question.trim(); 
+    const newCategory = values.category.trim();  
+
     const exists = questions.some(q =>
-      q.question.trim().toLowerCase() === newQuestionText.toLowerCase() && // cùng nội dung câu hỏi
-      q.category === newCategory &&                                        // cùng category
-      (!editingQuestion || q.id !== editingQuestion.id)                     // nếu đang edit thì bỏ qua question đang edit
+      q.question.trim().toLowerCase() === newQuestionText.toLowerCase() &&
+      q.category === newCategory &&                                      
+      (!editingQuestion || q.id !== editingQuestion.id)                   
     );
 
-    // nếu tồn tại câu hỏi trùng => thông báo và không thêm
     if (exists) {
       Swal.fire({
         icon: "warning",
@@ -276,33 +250,29 @@ const handleModalOk = () => {
         timer: 2000,
         timerProgressBar: true,
       });
-      return; // thoát hàm, không tiếp tục thêm
+      return;
     }
 
-    // ----- Tạo object question mới hoặc update nếu đang edit -----
     const newQuestion: Question = {
-      id: editingQuestion ? editingQuestion.id : Date.now(), // dùng id cũ nếu edit, hoặc timestamp mới nếu thêm
+      id: editingQuestion ? editingQuestion.id : Date.now(),
       question: newQuestionText,
       category: newCategory,
-      answer: values.answer,                                 // đáp án đúng
-      options: values.options.split(",").map((o: string) => o.trim()) // tách options từ chuỗi và trim
+      answer: values.answer,                            
+      options: values.options.split(",").map((o: string) => o.trim()) 
     };
 
-    // nếu đang edit
     if (editingQuestion) {
-      setQuestions(prev => prev.map(q => q.id === editingQuestion.id ? newQuestion : q)); // update question trong state
-      Swal.fire("Updated!", "Question has been updated.", "success");                     // thông báo success
+      setQuestions(prev => prev.map(q => q.id === editingQuestion.id ? newQuestion : q)); 
+      Swal.fire("Updated!", "Question has been updated.", "success");                  
     } else {
-      // thêm mới
-      setQuestions(prev => [...prev, newQuestion]); // push question mới vào state
-      Swal.fire("Added!", "Question has been added.", "success"); // thông báo success
+      setQuestions(prev => [...prev, newQuestion]);
+      Swal.fire("Added!", "Question has been added.", "success"); 
     }
 
-    setModalVisible(false); // đóng modal sau khi thêm/sửa xong
+    setModalVisible(false);
   });
 };
 
-// ----- Render component QuizPage -----
 return (
   <div
     style={{
@@ -314,10 +284,10 @@ return (
       display: "flex",
       flexDirection: "column",
       position: "relative",
-      paddingBottom: 100, // ✅ thêm khoảng trống để footer không đè lên
+      paddingBottom: 100,
     }}
   >
-    {/* Header: title + Start Quiz + Manage Questions */}
+
     <Row style={{ marginBottom: 20, display: "flex", alignItems: "center" }}>
       <Col flex="auto">
         <h2>
@@ -342,7 +312,6 @@ return (
       </Col>
     </Row>
 
-    {/* ----- Manage Mode ----- */}
     {manageMode && (
       <Card style={{ marginBottom: 20 }}>
         <Row gutter={16} align="middle">
@@ -594,7 +563,6 @@ return (
       </>
     )}
 
-    {/* Footer */}
     <div style={{ marginTop: "auto" }}>
       <Footer />
     </div>

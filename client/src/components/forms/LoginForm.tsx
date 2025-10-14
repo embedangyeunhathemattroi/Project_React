@@ -3,17 +3,15 @@ import { Form, Input, Button, Spin } from "antd";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../hook/hooks";
 import { loginUser } from "../../stores/slices/authSlice";
-// Props cho form: có thể truyền đường dẫn redirect sau khi login thành công
 interface LoginFormProps {
   onSuccessRedirect?: string;
 }
 const LoginForm: React.FC<LoginFormProps> = ({ onSuccessRedirect = "/dashboard" }) => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const { loading } = useAppSelector((state) => state.auth); // lấy trạng thái loading từ redux
+  const { loading } = useAppSelector((state) => state.auth); 
   const onFinish = async (values: any) => {
     try {
-      // Gọi action loginUser , unwrap để lấy kết quả trả về hoặc throw lỗi
       const user = await dispatch(loginUser(values)).unwrap();
       // Nếu login thành công → chuyển trang
       navigate(onSuccessRedirect);
@@ -25,7 +23,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccessRedirect = "/dashboard" 
   return (
     <Form 
       layout="vertical" 
-      onFinish={onFinish}           // khi submit form sẽ gọi onFinish
+      onFinish={onFinish}          
       requiredMark={false}         
     >
       <Form.Item
@@ -46,12 +44,11 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccessRedirect = "/dashboard" 
         />
       </Form.Item>
 
-      {/* Button submit */}
       <Button 
         type="primary" 
         htmlType="submit" 
         block 
-        loading={loading} // hiện spinner khi đang login
+        loading={loading} 
       >
         Login
       </Button>

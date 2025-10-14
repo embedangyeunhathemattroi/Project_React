@@ -48,7 +48,7 @@ const FlashCard: React.FC<FlashCardProps> = ({
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
-            boxShadow: "0 8px 20px rgba(0,0,0,0.3)", // Đổ bóng
+            boxShadow: "0 8px 20px rgba(0,0,0,0.3)", 
             fontSize: "1.8rem",
             fontWeight: "bold",
           }}

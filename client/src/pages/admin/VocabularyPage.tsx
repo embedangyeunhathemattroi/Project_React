@@ -295,10 +295,7 @@ const VocabularyPage: React.FC = () => {
             onPageChange={(page) => setCurrentPage(page)}
           />
         </div>
-        {/* Trang hiện tại = {Trang hiện tại}
-tổng số mục = {chiều dài đã lọc}
-Kích thước trang = {mục trên mỗi trang}
-onPageChange = {(trang) => setTrang hiện tại (trang)} */}
+     
       </main>
 
       {/* Modal Add/Edit */}

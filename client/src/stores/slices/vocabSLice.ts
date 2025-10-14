@@ -2,54 +2,56 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { fetchVocabsApi, addVocabApi, updateVocabApi, deleteVocabApi } from "../../apis/vocabApi";
 import type { Vocab } from "../../types/vocab";
 
-// Định nghĩa state cho vocab
 interface VocabState {
-  vocabs: Vocab[];   // danh sách vocab hiện có
-  loading: boolean;  // trạng thái loading khi gọi API
+  vocabs: Vocab[];
+  loading: boolean;
   error: string | null;
 }
 
-// state ban đầu
 const initialState: VocabState = {
   vocabs: [],
   loading: false,
   error: null,
 };
 
-// Lấy danh sách vocab từ server
-export const fetchVocabs = createAsyncThunk( "vocabs/fetch", async (_, { rejectWithValue }) => {       
+export const fetchVocabs = createAsyncThunk(
+  "vocabs/fetch",
+  async (_, { rejectWithValue }) => {
     try {
-      return await fetchVocabsApi();       // gọi API trả về danh sách vocab
+      return await fetchVocabsApi();
     } catch (err: any) {
-      return rejectWithValue(err.message || "Lấy dữ liệu thất bại"); 
+      return rejectWithValue(err.message || "Lấy dữ liệu thất bại");
     }
   }
 );
 
-// Thêm vocab mới
-export const addVocab = createAsyncThunk( "vocabs/add",async (vocabData: Omit<Vocab, "id">, { rejectWithValue }) => {
+export const addVocab = createAsyncThunk(
+  "vocabs/add",
+  async (vocabData: Omit<Vocab, "id">, { rejectWithValue }) => {
     try {
-      return await addVocabApi(vocabData);   // gọi API thêm vocab mới
+      return await addVocabApi(vocabData);
     } catch (err: any) {
       return rejectWithValue(err.message || "Thêm vocab thất bại");
     }
   }
 );
 
-// Cập nhật vocab
-export const updateVocab = createAsyncThunk( "vocabs/update",async (vocabData: Vocab, { rejectWithValue }) => {
+export const updateVocab = createAsyncThunk(
+  "vocabs/update",
+  async (vocabData: Vocab, { rejectWithValue }) => {
     try {
-      return await updateVocabApi(vocabData); // gọi API cập nhật vocab
+      return await updateVocabApi(vocabData);
     } catch (err: any) {
       return rejectWithValue(err.message || "Cập nhật vocab thất bại");
     }
   }
 );
 
-// Xóa vocab
-export const deleteVocab = createAsyncThunk("vocabs/delete",async (id: number, { rejectWithValue }) => {
+export const deleteVocab = createAsyncThunk(
+  "vocabs/delete",
+  async (id: number, { rejectWithValue }) => {
     try {
-      return await deleteVocabApi(id); // gọi API xóa vocab theo id
+      return await deleteVocabApi(id);
     } catch (err: any) {
       return rejectWithValue(err.message || "Xóa vocab thất bại");
     }
@@ -57,50 +59,42 @@ export const deleteVocab = createAsyncThunk("vocabs/delete",async (id: number, {
 );
 
 const vocabSlice = createSlice({
-  name: "vocabs",           // tên slice
-  initialState,             // state mặc định
-  reducers: {},             
+  name: "vocabs",
+  initialState,
+  reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(fetchVocabs.pending, (state) => { // đang load API
-        state.loading = true;   
-        state.error = null;    
+      .addCase(fetchVocabs.pending, (state) => {
+        state.loading = true;
+        state.error = null;
       })
-      .addCase(fetchVocabs.fulfilled, (state, action) => { // fetch thành công
+      .addCase(fetchVocabs.fulfilled, (state, action) => {
         state.loading = false;
-        state.vocabs = action.payload; // lưu danh sách vocab vào state
+        state.vocabs = action.payload;
       })
-      .addCase(fetchVocabs.rejected, (state, action) => { // fetch thất bại
+      .addCase(fetchVocabs.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       })
-
-      // --- xử lý thêm vocab ---
       .addCase(addVocab.fulfilled, (state, action) => {
-        state.vocabs.push(action.payload); // thêm vocab mới vào state
+        state.vocabs.push(action.payload);
       })
-
-     .addCase(updateVocab.fulfilled, (state, action) => {
-  //  Tìm vị trí (index) của từ vựng trong mảng `state.vocabs` có cùng ID với từ được cập nhật
-  const index = state.vocabs.findIndex(v => v.id === action.payload.id);
-  //  Nếu tìm thấy (index khác -1) → thay thế phần tử cũ bằng dữ liệu mới từ `action.payload`→ Giúp cập nhật đúng từ vựng vừa được sửa trong Redux store
-  if (index !== -1) state.vocabs[index] = action.payload;
-})
-
-
-      // --- xử lý xóa vocab ---
+      .addCase(updateVocab.fulfilled, (state, action) => {
+        const index = state.vocabs.findIndex((v) => v.id === action.payload.id);
+        if (index !== -1) state.vocabs[index] = action.payload;
+      })
       .addCase(deleteVocab.fulfilled, (state, action) => {
-        state.vocabs = state.vocabs.filter(v => v.id !== action.payload); // xóa vocab theo id
+        state.vocabs = state.vocabs.filter((v) => v.id !== action.payload);
       });
   },
 });
 
-// === Selector để lọc vocab theo search và category ===
 export const selectFilteredVocabs = (state: any, search: string, category: string) => {
-  return state.vocabs.vocabs.filter((v: Vocab) =>
-    v.word.toLowerCase().includes(search.toLowerCase()) &&  // lọc theo từ khóa
-    (category === "All" || v.topic === category)           // lọc theo category nếu khác "All"
+  return state.vocabs.vocabs.filter(
+    (v: Vocab) =>
+      v.word.toLowerCase().includes(search.toLowerCase()) &&
+      (category === "All" || v.topic === category)
   );
 };
 
-export default vocabSlice.reducer; 
+export default vocabSlice.reducer;

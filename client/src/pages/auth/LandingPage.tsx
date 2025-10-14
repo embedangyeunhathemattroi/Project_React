@@ -35,5 +35,5 @@ const LandingPage: React.FC = () => {
     </div>
   );
 };
-//LandingPage dành cho người chưa login → chỉ cần hiển thị giới thiệu app và 2 nút dẫn đến login/register.
+
 export default LandingPage;

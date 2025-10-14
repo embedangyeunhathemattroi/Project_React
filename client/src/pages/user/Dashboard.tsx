@@ -68,6 +68,6 @@ const Dashboard: React.FC = () => {
 
   );
 };
-//Dashboard dành cho người đã login → cần layout chuyên nghiệp, full height, footer, background riêng.
+
 
 export default Dashboard;

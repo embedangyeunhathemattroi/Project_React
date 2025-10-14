@@ -1,28 +1,21 @@
 import React from "react";
-import { useSelector, useDispatch } from "react-redux"; // hook để lấy state và dispatch action
-import type { RootState } from "../../stores/store"; // type RootState của Redux store
-import { logoutUser } from "../../stores/slices/authSlice"; // async thunk logout
-import { useNavigate } from "react-router-dom"; // hook navigate chuyển trang
-import Swal from "sweetalert2"; // hiển thị popup đẹp
-
-// Props của Navbar
+import { useSelector, useDispatch } from "react-redux";
+import type { RootState } from "../../stores/store"; 
+import { logoutUser } from "../../stores/slices/authSlice"; 
+import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2"; 
 interface NavbarProps {
-  activePage?: "login" | "register"; // trang đang active (màu button)
-  onChangePage?: (page: "login" | "register") => void; // callback chuyển trang
+  activePage?: "login" | "register";
+  onChangePage?: (page: "login" | "register") => void; 
 }
 
-// Navbar component
+
 const Navbar: React.FC<NavbarProps> = ({ activePage, onChangePage }) => {
-  // Lấy user từ Redux state
   const user = useSelector((state: RootState) => state.auth.user);
-  // dispatch các async thunk (logoutUser)
   const dispatch = useDispatch<any>();
-  // navigate để chuyển trang
   const navigate = useNavigate();
 
-  // ----------------------- Hàm logout -----------------------
   const handleLogout = async () => {
-    //  Hiển thị confirm popup trước khi logout
     const result = await Swal.fire({
       title: "Are you sure you want to logout?",
       text: "Your session will be ended.",
@@ -33,10 +26,9 @@ const Navbar: React.FC<NavbarProps> = ({ activePage, onChangePage }) => {
       confirmButtonText: "Yes, logout",
     });
 
-    //  Nếu user xác nhận logout
+   
     if (result.isConfirmed) {
-      await dispatch(logoutUser()); // gọi async thunk logout → xóa user khỏi Redux state & localStorage
-      //  Hiển thị popup thông báo đã logout thành công
+      await dispatch(logoutUser());
       await Swal.fire({
         title: "Logged out!",
         text: "You have been logged out successfully.",
@@ -48,7 +40,6 @@ const Navbar: React.FC<NavbarProps> = ({ activePage, onChangePage }) => {
         confirmButtonColor: "#43a047",
       });
 
-      //  Chuyển về trang login sau khi logout
       navigate("/login"); 
     }
   };
@@ -62,7 +53,7 @@ const Navbar: React.FC<NavbarProps> = ({ activePage, onChangePage }) => {
         backgroundColor: "#fff",
       }}
     >
-      {/* Logo / Brand */}
+     
       <div
         style={{
           fontWeight: "bold",
@@ -70,23 +61,22 @@ const Navbar: React.FC<NavbarProps> = ({ activePage, onChangePage }) => {
           cursor: "pointer",
           flex: 1,
         }}
-        // click vào logo → nếu user login thì về dashboard, chưa login thì về trang home
+     
         onClick={() => navigate(user ? "/dashboard" : "/")}
       >
         VocabApp
       </div>
 
-      {/* Nếu chưa login → hiển thị button Login / Register */}
       {!user ? (
         <div style={{ display: "flex", gap: "10px" }}>
           <button
-            onClick={() => onChangePage && onChangePage("login")} // gọi callback để parent chuyển trang
+            onClick={() => onChangePage && onChangePage("login")} 
             style={{
               padding: "8px 16px",
               borderRadius: "5px",
               border: "1px solid #43a5f5",
               cursor: "pointer",
-              backgroundColor: activePage === "login" ? " #3B82F6" : "#1e77c0ff", // highlight button active
+              backgroundColor: activePage === "login" ? " #3B82F6" : "#1e77c0ff", 
               color: "#fff",
               transition: "0.3s",
             }}
@@ -100,7 +90,7 @@ const Navbar: React.FC<NavbarProps> = ({ activePage, onChangePage }) => {
               borderRadius: "5px",
               border: "1px solid #22C55E",
               cursor: "pointer",
-              backgroundColor: activePage === "register" ? "#2e7d32" : "#22C55E", // highlight button active
+              backgroundColor: activePage === "register" ? "#2e7d32" : "#22C55E", 
               color: "#fff",
               transition: "0.3s",
             }}
@@ -109,11 +99,11 @@ const Navbar: React.FC<NavbarProps> = ({ activePage, onChangePage }) => {
           </button>
         </div>
       ) : (
-        // Nếu đã login → hiển thị tên user + button Logout
+        
         <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
           <span>Hi, {user.firstName || user.email}</span>
           <button
-            onClick={handleLogout} // gọi hàm logout
+            onClick={handleLogout} 
             style={{
               padding: "8px 16px",
               borderRadius: "5px",
